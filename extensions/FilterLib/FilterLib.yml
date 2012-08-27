@@ -4,6 +4,7 @@ sources:
   - source/TTAllpass.cpp			
   - source/TTHighpassButterworth2.cpp
   - source/TTAllpass1.cpp			
+  - source/TTComb.cpp			
   - source/TTHighpassButterworth3.cpp
   - source/TTAllpass1a.cpp			
   - source/TTHighpassButterworth4.cpp
@@ -42,6 +43,7 @@ sources:
   - source/TTHighpassButterworth1.cpp	
   - source/TTSvf.cpp
   - tests/TTAllpass1.test.cpp
+  - tests/TTComb.test.cpp
 
 includes:
   - "includes"
