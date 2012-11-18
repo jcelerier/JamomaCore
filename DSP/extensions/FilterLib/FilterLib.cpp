@@ -30,6 +30,8 @@
 #include "TTMirror5.h"
 #include "TTMirrorBandpass10.h"
 
+#include "TTComb.h"
+
 #include "TTBandpassButterworth2.h"
 #include "TTBandrejectButterworth2.h"
 #include "TTHighpassButterworth1.h"
@@ -80,6 +82,7 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_FilterLib(void)
 	TTMirrorBandpass10::registerClass();
 	
 	//	TTAverage::registerClass();
+	TTComb::registerClass();
 
 	TTBandpassButterworth2::registerClass();
 	TTBandRejectButterworth2::registerClass();
