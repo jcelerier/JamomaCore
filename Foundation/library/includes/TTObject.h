@@ -117,11 +117,11 @@ private:
 	TTHash*				attributes;			///< The collection of all attributes for this object, keyed on the attribute name.
 protected:
 	TTList*				observers;			///< List of all objects watching this object for life-cycle and other changes.
+	TTUInt16			referenceCount;		///< Reference count for this instance.
 private:
 	TTList*				messageObservers;	///< List of all objects watching this object for messages sent to it.
 	TTList*				attributeObservers;	///< List of all objects watching this object for changes to attribute values.
 	TTAtomicInt			mLocked;			///< E.g. is this object busy doing something that would prevent us from being able to free it?
-	TTUInt16			referenceCount;		///< Reference count for this instance.
 public:
 	TTBoolean			valid;				///< If the object isn't completely built, or is in the process of freeing, this will be false.
 private:
