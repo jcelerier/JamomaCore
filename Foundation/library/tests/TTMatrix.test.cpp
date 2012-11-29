@@ -282,6 +282,9 @@ TTErr TTMatrix::test(TTValue& returnedTestInfo)
 						testAssertionCount,
 						errorCount);
 		
+		matrix->incrementReferenceCount(); // this should cause the free object test to fail
+		TTTestLog("Expected a value of %i, but returned value was %i", 2, matrix->getReferenceCount());
+		
 		err = TTObjectRelease((TTObjectPtr*)&matrix);
 		TTTestAssertion("frees successfully", 
 						err == kTTErrNone, 
