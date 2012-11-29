@@ -34,6 +34,8 @@ TTErr TTMatrix::test(TTValue& returnedTestInfo)
 						testAssertionCount,
 						errorCount);
 		
+		// we will be using it for a while, so let's tell Jamoma
+		matrix->incrementReferenceCount(); // this should cause attempts to free the object to fail
 		
 		// a clear series of tests to ensure type switching via TTDataInfo::matchSymbolToDataType() method works
 		TTTestAssertion("default datatype is uint8", 
@@ -282,8 +284,13 @@ TTErr TTMatrix::test(TTValue& returnedTestInfo)
 						testAssertionCount,
 						errorCount);
 		
-		matrix->incrementReferenceCount(); // this should cause the free object test to fail
-		TTTestLog("Expected a value of %i, but returned value was %i", 2, matrix->getReferenceCount());
+		err = TTObjectRelease((TTObjectPtr*)&matrix);
+		TTTestAssertion("cannot free before decrementReferenceCount", 
+						err == kTTErrFreeFailed, 
+						testAssertionCount,
+						errorCount);
+		
+		matrix->decrementReferenceCount(); // now that we are done, let's tell Jamoma
 		
 		err = TTObjectRelease((TTObjectPtr*)&matrix);
 		TTTestAssertion("frees successfully", 
