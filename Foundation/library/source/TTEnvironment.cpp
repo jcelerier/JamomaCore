@@ -267,17 +267,21 @@ TTErr TTEnvironment::releaseInstance(TTObjectPtr* anObject)
 
 	TT_ASSERT("can only release a valid instance", *anObject && (*anObject)->valid == 1 && (*anObject)->referenceCount);
 
-	(*anObject)->valid = false;
-	(*anObject)->observers->iterateObjectsSendingMessage("objectFreeing", v);
-
 	waitForLock(); // in case an object is processing a vector of audio in another thread or something...
 
-	(*anObject)->referenceCount--;
-	if ((*anObject)->referenceCount < 1) {
+	if ((*anObject)->referenceCount < 2) 
+	{
+		(*anObject)->valid = false;
+		(*anObject)->observers->iterateObjectsSendingMessage("objectFreeing", v);
+		
 		delete *anObject;
 		*anObject = NULL;
+		
+		return kTTErrNone;
+	} else {
+		return kTTErrFreeFailed;
 	}
-	return kTTErrNone;
+	
 }
 
 
