@@ -117,11 +117,11 @@ private:
 	TTHash*				attributes;			///< The collection of all attributes for this object, keyed on the attribute name.
 protected:
 	TTList*				observers;			///< List of all objects watching this object for life-cycle and other changes.
-	TTUInt16			referenceCount;		///< Reference count for this instance.
 private:
 	TTList*				messageObservers;	///< List of all objects watching this object for messages sent to it.
 	TTList*				attributeObservers;	///< List of all objects watching this object for changes to attribute values.
 	TTAtomicInt			mLocked;			///< E.g. is this object busy doing something that would prevent us from being able to free it?
+	TTUInt16			referenceCount;		///< Reference count for this instance.
 public:
 	TTBoolean			valid;				///< If the object isn't completely built, or is in the process of freeing, this will be false.
 private:
@@ -139,9 +139,39 @@ public:
 	virtual ~TTObject();
 	
 	/**	Query an object to get its current reference count.	
-	 @return								Reference count.
+		@return		Reference count as TTUInt16
+		@seealso 	decrementReferenceCount, incrementReferenceCount
 	 */
 	TTUInt16 getReferenceCount() {return referenceCount;}
+	
+	/** Increase the reference count by one. 
+		The referenceCount member is used to track usage of an individual matrix.  When another object makes use of a specific matrix, the code should use this method to increase the reference counter prior to the start of use.
+		@return 	TTErr		always returns kTTErrNone
+		@seealso 	decrementReferenceCount, getReferenceCount
+	*/
+	TTErr incrementReferenceCount()
+	{
+		// could technically exceed 65,535 maximum, but we'll take the chance for now
+		this->referenceCount++;
+		return kTTErrNone;
+	}
+	
+	/** Decrease the reference count by one. 
+		The referenceCount member is used to track usage of an individual matrix.  When another object makes use of a specific matrix, the code should use this method to decrease the reference counter at the conclusion of use.
+		@return 	TTErr		returns kTTErrGeneric if referenceCount is already 1, else kTTErrNone
+		@seealso 	incrementReferenceCount, getReferenceCount
+	*/
+	TTErr decrementReferenceCount()
+	{
+		if (this->referenceCount > 1)
+		{
+			this->referenceCount--;
+			return kTTErrNone;
+		} else {
+			return kTTErrGeneric;
+		}
+		
+	}
 	
 	/** @brief Register an attribute
 	 @details The theory on attributes is that the subclass calls registerAttribute()

@@ -567,35 +567,7 @@ public:
 		// NOTE: we could also cache the pointer in getLockedPointer() and match it to this.
 		// But maybe that makes not sense.
 	}
-	
-	/** Increase the reference count by one. 
-		The referenceCount member is used to track usage of an individual matrix.  When another object makes use of a specific matrix, the code should use this method to increase the reference counter prior to the start of use.
-		@return 	TTErr		always returns kTTErrNone
-		@seealso 	decrementReferenceCount
-	*/
-	TTErr incrementReferenceCount()
-	{
-		// could technically exceed 65,535 maximum, but we'll take the chance for now
-		this->referenceCount++;
-		return kTTErrNone;
-	}
-	
-	/** Decrease the reference count by one. 
-		The referenceCount member is used to track usage of an individual matrix.  When another object makes use of a specific matrix, the code should use this method to decrease the reference counter at the conclusion of use.
-		@return 	TTErr		returns kTTErrGeneric if referenceCount is already 1, else kTTErrNone
-		@seealso 	incrementReferenceCount
-	*/
-	TTErr decrementReferenceCount()
-	{
-		if (this->referenceCount > 1)
-		{
-			this->referenceCount--;
-			return kTTErrNone;
-		} else {
-			return kTTErrGeneric;
-		}
 		
-	}	
 	
 #if 0
 #pragma mark -
