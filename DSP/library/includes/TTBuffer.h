@@ -44,10 +44,14 @@ public:
 	// internal method used for disposing of a no-longer used matrix
 	void chuckMatrix(TTSampleMatrixPtr oldMatrix, TTSymbol& oldMatrixName)
 	{
-		if (oldMatrix->getReferenceCount() == 1) // only one of these, it is about to go away, so we'll pop it from the map
+		if (oldMatrix->getReferenceCount() < 2) // only one of these, it is about to go away, so we'll pop it from the map
+		{
 			gTTBufferNameMap->remove(oldMatrixName);
-		
-		TTObjectRelease(TTObjectHandle(&oldMatrix));
+			TTObjectRelease(TTObjectHandle(&oldMatrix));
+		} else {
+			// we need some way to wait and free after the matrix is ready
+			// or should there be some sort of error here?
+		}
 	}
 	
 	

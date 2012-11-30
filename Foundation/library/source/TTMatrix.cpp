@@ -58,8 +58,9 @@ TT_OBJECT_CONSTRUCTOR,
 
 TTMatrix::~TTMatrix()
 {
+	// NOTE: referenceCount is handled by the TTEnvironment:releaseInstance method
 	if (mDataIsLocallyOwned)
-		delete[] mData; // TODO: only do this if the refcount for the data is down to zero!
+		delete[] mData;
 }
 
 
