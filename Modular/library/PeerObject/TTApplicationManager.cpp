@@ -249,7 +249,7 @@ TTErr TTApplicationManager::ProtocolScan(const TTValue& inputValue, TTValue& out
 
 TTErr TTApplicationManager::ProtocolRun(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTValue				v, protocolNames, applicationNames;
+	TTValue				v, protocolNames, applicationNames, aReturnWeDontCareAbout;
 	TTSymbol			protocolName, applicationName;
 	ProtocolPtr			aProtocol;
 	TTApplicationPtr	anApplication;
@@ -273,7 +273,7 @@ TTErr TTApplicationManager::ProtocolRun(const TTValue& inputValue, TTValue& outp
 		for (TTUInt16 i = 0; i < protocolNames.size(); i++) {
 			
 			protocolName = protocolNames[i];
-			this->ProtocolRun(protocolName, kTTValNONE);
+			this->ProtocolRun(protocolName, aReturnWeDontCareAbout);
 		}
 		
 		return kTTErrNone;
@@ -309,7 +309,7 @@ TTErr TTApplicationManager::ProtocolRun(const TTValue& inputValue, TTValue& outp
 
 TTErr TTApplicationManager::ProtocolStop(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTValue				v, protocolNames, applicationNames;
+	TTValue				v, protocolNames, applicationNames, aReturnWeDontCareAbout;
 	TTSymbol			protocolName, applicationName;
 	ProtocolPtr			aProtocol;
 	TTApplicationPtr	anApplication;
@@ -333,7 +333,7 @@ TTErr TTApplicationManager::ProtocolStop(const TTValue& inputValue, TTValue& out
 		for (TTUInt16 i = 0; i < protocolNames.size(); i++) {
 			
 			protocolName = protocolNames[i];
-			this->ProtocolStop(protocolName, kTTValNONE);
+			this->ProtocolStop(protocolName, aReturnWeDontCareAbout);
 		}
 		
 		return kTTErrNone;
@@ -712,7 +712,7 @@ TTErr TTApplicationManager::ReadFromXml(const TTValue& inputValue, TTValue& outp
 	TTSymbol			applicationName, currentApplicationName, version, type;
     TTSymbol			protocolName, currentProtocolName, parameterName;
     TTHashPtr           hashParameters;
-	TTValue				v, args, applicationNames, protocolNames, parameterValue;
+	TTValue				v, args, applicationNames, protocolNames, parameterValue, aReturnWeDontCareAbout;
     TTUInt16            i, j;
     TTErr               err;
 	
@@ -726,7 +726,7 @@ TTErr TTApplicationManager::ReadFromXml(const TTValue& inputValue, TTValue& outp
 	if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingStarts) {
 		
 		// stop protocol reception threads
-		ProtocolStop(v, kTTValNONE);
+		ProtocolStop(v, aReturnWeDontCareAbout);
         
         // unregister all applications from all protocols
         mProtocols->getKeys(protocolNames);
@@ -766,7 +766,7 @@ TTErr TTApplicationManager::ReadFromXml(const TTValue& inputValue, TTValue& outp
 	if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingEnds) {
 		
 		// start protocol reception threads
-		ProtocolRun(v, kTTValNONE);
+		ProtocolRun(v, aReturnWeDontCareAbout);
 		
 		return kTTErrNone;
 	}
@@ -933,7 +933,7 @@ TTErr TTApplicationManager::ReadFromXml(const TTValue& inputValue, TTValue& outp
 TTErr TTApplicationManager::notifyApplicationObservers(TTSymbol anApplicationName, TTApplicationPtr anApplication, TTApplicationNotificationFlag flag)
 {
 	unsigned int    i;
-	TTValue         hk, lk, o, f, data;
+	TTValue         hk, lk, o, f, data, aReturnWeDontCareAbout;
 	TTSymbol        key;
 	TTListPtr       lk_o;
 	TTCallbackPtr   anObserver;
@@ -969,7 +969,7 @@ TTErr TTApplicationManager::notifyApplicationObservers(TTSymbol anApplicationNam
 						data.append(TTObjectBasePtr(anApplication));
 						data.append((TTInt8)flag);
 						data.append(TTObjectBasePtr(anObserver));
-						anObserver->notify(data, kTTValNONE);
+						anObserver->notify(data, aReturnWeDontCareAbout);
 					}
 					
 					foundObsv = true;

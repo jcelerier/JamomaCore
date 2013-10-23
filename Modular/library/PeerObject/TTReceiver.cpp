@@ -151,7 +151,7 @@ TTErr TTReceiver::Get()
 	TTObjectBasePtr anObject;
 	TTAddress   anAddress;
 	TTSymbol	ttAttributeName;
-	TTValue		data, v;
+	TTValue		data, v, aReturnWeDontCareAbout;
 	TTErr		err;
 	
     if (!mNodesObserversCache.isEmpty()) {
@@ -185,11 +185,11 @@ TTErr TTReceiver::Get()
                         v.append(anAddress);
                         
                         if (mReturnAddressCallback)
-                            mReturnAddressCallback->notify(v, kTTValNONE);
+                            mReturnAddressCallback->notify(v, aReturnWeDontCareAbout);
                         
                         // return the value
                         if (mReturnValueCallback)
-                            mReturnValueCallback->notify(data, kTTValNONE);
+                            mReturnValueCallback->notify(data, aReturnWeDontCareAbout);
                     }
                     else
                         return kTTErrGeneric;
@@ -213,7 +213,7 @@ TTErr TTReceiver::bindAddress()
 	TTObjectBasePtr	newObserver, o;
 	TTList			aNodeList;
 	TTNodePtr		aNode;
-	TTValue			v, data, newElement;
+	TTValue			v, data, newElement, aReturnWeDontCareAbout;
 	TTValuePtr		newBaton;
 	TTErr			err;
 	
@@ -276,7 +276,7 @@ TTErr TTReceiver::bindAddress()
                         if (mReturnAddressCallback) {
                             
                             v = TTValue(anAddress);
-                            mReturnAddressCallback->notify(v, kTTValNONE);
+                            mReturnAddressCallback->notify(v, aReturnWeDontCareAbout);
                         }
 					}
 				}
@@ -417,7 +417,7 @@ TTErr TTReceiverDirectoryCallback(TTPtr baton, TTValue& data)
 	TTAttributePtr	anAttribute = NULL;
 	TTObjectBasePtr	newObserver, oldObserver, o = NULL;
 	TTNodePtr		aNode, p_node;
-	TTValue			c, v;
+	TTValue			c, v, aReturnWeDontCareAbout;
 	TTUInt8			flag;
 	TTBoolean		found;
 	TTValuePtr		newBaton;
@@ -445,7 +445,7 @@ TTErr TTReceiverDirectoryCallback(TTPtr baton, TTValue& data)
 				// return the address
 				if (aReceiver->mReturnAddressCallback) {
                     v.append(aReceiver->mAddress.removeAttribute());
-					aReceiver->mReturnAddressCallback->notify(v, kTTValNONE);
+					aReceiver->mReturnAddressCallback->notify(v, aReturnWeDontCareAbout);
                 }
 			}
 			else if (ttAttributeName != kTTSym_destroyed)
@@ -516,7 +516,7 @@ TTErr TTReceiverDirectoryCallback(TTPtr baton, TTValue& data)
 				if (aReceiver->mReturnAddressCallback) {
                     
                     v.append(aReceiver->mAddress.removeAttribute());
-					aReceiver->mReturnAddressCallback->notify(v, kTTValNONE);
+					aReceiver->mReturnAddressCallback->notify(v, aReturnWeDontCareAbout);
                 }
 			}
 			else if (ttAttributeName != kTTSym_created)
@@ -584,7 +584,7 @@ TTErr TTReceiverAttributeCallback(TTPtr baton, TTValue& data)
 	TTValuePtr		b;
 	TTReceiverPtr	aReceiver;
 	TTAddress       anAddress;
-	TTValue			v;
+	TTValue			v, aReturnWeDontCareAbout;
 	
 	// unpack baton
 	b = (TTValuePtr)baton;
@@ -598,11 +598,11 @@ TTErr TTReceiverAttributeCallback(TTPtr baton, TTValue& data)
 		
 		// return address
 		if (aReceiver->mReturnAddressCallback)
-			aReceiver->mReturnAddressCallback->notify(v, kTTValNONE);
+			aReceiver->mReturnAddressCallback->notify(v, aReturnWeDontCareAbout);
 		
 		// return the value
 		if (aReceiver->mReturnValueCallback)
-			aReceiver->mReturnValueCallback->notify(data, kTTValNONE);
+			aReceiver->mReturnValueCallback->notify(data, aReturnWeDontCareAbout);
 	}
 	
 	return kTTErrNone;
