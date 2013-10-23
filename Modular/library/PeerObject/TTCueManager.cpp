@@ -65,6 +65,7 @@ mReturnLineCallback(NULL)
 	addMessage(Clear);
 	
 	addMessageWithArguments(Store);
+    addMessageWithArguments(Update);
     addMessageWithArguments(Append);
 	addMessageWithArguments(Recall);
 	addMessageWithArguments(Output);
@@ -236,6 +237,8 @@ TTErr TTCueManager::NamespaceAppend(const TTValue& inputValue, TTValue& outputVa
 {
 	TTAddressItemPtr    aNamespace, anItem;
 	TTAddress           address;
+    TTList              childrenNodes;
+    TTNodePtr           aNode;
 	TTUInt32			i;
 	TTErr				err;
 	
@@ -250,8 +253,38 @@ TTErr TTCueManager::NamespaceAppend(const TTValue& inputValue, TTValue& outputVa
 			
 			err = aNamespace->append(address, &anItem);
 			
-			if (!err)
+			if (!err) {
+                
 				anItem->setSelection(YES);
+                
+                // if the item is empty
+                if (anItem->isEmpty()) {
+                    
+                    // fill the item with all children below the node
+                    err = getDirectoryFrom(address)->getTTNode(address, &aNode);
+                    
+                    if (!err) {
+                        
+                        // get all children of the node
+                        aNode->getChildren(S_WILDCARD, S_WILDCARD, childrenNodes);
+                        
+                        // sort the NodeList using object priority order
+                        childrenNodes.sort(&TTCueCompareNodePriority);
+                        
+                        // append each name.instance to the sub namespace
+                        for (childrenNodes.begin(); childrenNodes.end(); childrenNodes.next()) {
+                            
+                            aNode = TTNodePtr((TTPtr)childrenNodes.current()[0]);
+                            
+                            // get absolute address
+                            aNode->getAddress(address);
+                            
+                            // append to the namespace
+                            NamespaceAppend(address, outputValue);
+                        }
+                    }
+                }
+            }
 		}
 	}
 	
@@ -419,6 +452,56 @@ TTErr TTCueManager::Store(const TTValue& inputValue, TTValue& outputValue)
     }
     
     return err;
+}
+
+TTErr TTCueManager::Update(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTValue		v;
+    TTSymbol    anAddress = kTTAdrsRoot;
+	
+    if (inputValue.size() >= 1) {
+        
+        // get cue name
+        if (inputValue[0].type() == kTypeSymbol) {
+            mCurrent = inputValue[0];
+            
+            TTSymbol name;
+            for (TTInt32 i = 0; i < mNames.size(); i++) {
+                name = mNames[i];
+                if (name == mCurrent) {
+                    mCurrentPosition = i+1;
+                    break;
+                }
+            }
+        }
+        
+        // get cue at position
+        if (inputValue[0].type() == kTypeInt32) {
+            
+            mCurrentPosition = inputValue[0];
+            
+            if (mCurrentPosition > 0 && mCurrentPosition <= mNames.size())
+                mCurrent = mNames[mCurrentPosition-1];
+            else
+                return kTTErrGeneric;
+        }
+    }
+    
+    // get address from where update starts (default : kAdrsRoot)
+    if (inputValue.size() == 2)
+        if (inputValue[1].type() == kTypeSymbol)
+            anAddress = inputValue[1];
+	
+	// if cue exists
+	if (!mCues->lookup(mCurrent, v)) {
+		
+		mCurrentCue = TTCuePtr((TTObjectBasePtr)v[0]);
+		
+		if (mCurrentCue)
+            return mCurrentCue->sendMessage(kTTSym_Update, anAddress, kTTValNONE);
+	}
+	
+	return kTTErrGeneric;
 }
 
 TTErr TTCueManager::Append(const TTValue& inputValue, TTValue& outputValue)
@@ -1074,13 +1157,13 @@ TTErr TTCueManager::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	// Switch on the name of the XML node
 	
 	// Starts file reading : clear the cue list
-	if (aXmlHandler->mXmlNodeName == kTTSym_start) {
+	if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingStarts) {
 		Clear();
 		return kTTErrNone;
 	}
 	
 	// Ends file reading : bind on first cue
-	if (aXmlHandler->mXmlNodeName == kTTSym_stop) {
+	if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingEnds) {
 		
         if (mNames.size()) {
             

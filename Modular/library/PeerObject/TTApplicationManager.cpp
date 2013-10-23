@@ -271,9 +271,9 @@ TTErr TTApplicationManager::ProtocolRun(const TTValue& inputValue, TTValue& outp
 		// Run each protocol
 		mProtocols->getKeys(protocolNames);
 		for (TTUInt16 i = 0; i < protocolNames.size(); i++) {
-			TTValue dummy;
+			
 			protocolName = protocolNames[i];
-			this->ProtocolRun(protocolName, dummy);
+			this->ProtocolRun(protocolName, kTTValNONE);
 		}
 		
 		return kTTErrNone;
@@ -323,7 +323,7 @@ TTErr TTApplicationManager::ProtocolStop(const TTValue& inputValue, TTValue& out
 		
 		if (!mProtocols->lookup(protocolName, v)) {
 			aProtocol = ProtocolPtr((TTObjectBasePtr)v[0]);
-			stop = aProtocol->sendMessage(TTSymbol("Stop"));
+			stop = aProtocol->sendMessage(kTTSym_Stop);
 		}
 	}
 	else {
@@ -331,10 +331,9 @@ TTErr TTApplicationManager::ProtocolStop(const TTValue& inputValue, TTValue& out
 		// Stop each protocol
 		mProtocols->getKeys(protocolNames);
 		for (TTUInt16 i = 0; i < protocolNames.size(); i++) {
-			TTValue dummy;
 			
 			protocolName = protocolNames[i];
-			this->ProtocolStop(protocolName, dummy);
+			this->ProtocolStop(protocolName, kTTValNONE);
 		}
 		
 		return kTTErrNone;
@@ -724,13 +723,10 @@ TTErr TTApplicationManager::ReadFromXml(const TTValue& inputValue, TTValue& outp
 	// switch on the name of the XML node
 	
 	// starts reading
-	if (aXmlHandler->mXmlNodeName == kTTSym_start) {
-		TTValue dummy;
-	
-		mCurrentApplication = NULL;
+	if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingStarts) {
 		
 		// stop protocol reception threads
-		ProtocolStop(v, dummy);
+		ProtocolStop(v, kTTValNONE);
         
         // unregister all applications from all protocols
         mProtocols->getKeys(protocolNames);
@@ -767,11 +763,10 @@ TTErr TTApplicationManager::ReadFromXml(const TTValue& inputValue, TTValue& outp
 	}
 	
 	// ends reading
-	if (aXmlHandler->mXmlNodeName == kTTSym_stop) {
-		TTValue dummy;
-	
+	if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingEnds) {
+		
 		// start protocol reception threads
-		ProtocolRun(v, dummy);
+		ProtocolRun(v, kTTValNONE);
 		
 		return kTTErrNone;
 	}
@@ -967,8 +962,6 @@ TTErr TTApplicationManager::notifyApplicationObservers(TTSymbol anApplicationNam
 				if (!lk_o->isEmpty()) {
 					for (lk_o->begin(); lk_o->end(); lk_o->next())
 					{
-						TTValue dummy;
-						
 						anObserver = NULL;
 						anObserver = TTCallbackPtr((TTObjectBasePtr)lk_o->current()[0]);
 						TT_ASSERT("TTApplication observer list member is not NULL", anObserver);
@@ -976,7 +969,7 @@ TTErr TTApplicationManager::notifyApplicationObservers(TTSymbol anApplicationNam
 						data.append(TTObjectBasePtr(anApplication));
 						data.append((TTInt8)flag);
 						data.append(TTObjectBasePtr(anObserver));
-						anObserver->notify(data, dummy);
+						anObserver->notify(data, kTTValNONE);
 					}
 					
 					foundObsv = true;

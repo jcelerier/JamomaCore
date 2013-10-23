@@ -50,9 +50,9 @@ void TTModularInit()
 
 	TTObjectBasePtr test = NULL;
 	TTValue v;
-    
-	TTObjectBaseInstantiate(TTSymbol("dictionary.test"), TTObjectBaseHandle(&test), kTTValNONE);
-	test->sendMessage("test", v, kTTValNONE);
+	
+	TTObjectBaseInstantiate(TTSymbol("value.test"), &test, kTTValNONE);
+	TTDataObjectBasePtr(test)->test(v);
 
 #endif // TO_DEBUG
 	
