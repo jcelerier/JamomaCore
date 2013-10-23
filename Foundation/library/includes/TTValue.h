@@ -205,7 +205,7 @@ public:
 	template<class T>
 	friend bool operator == (const TTValue& a, const T b)
 	{
-		if (a.size() == 1 && a[0] == b)
+		if (a.size() == 1 && a[0] == b) // Max implementation library complains about this line being ambiguous: NW
 			return true;
 		else
 			return false;
