@@ -610,6 +610,8 @@ else
 	def generate_makefile(projectdir, projectname, forcedCompiler=NIL, path_to_moduleroot="../..", distropath=NIL)
 		makefile_generated = false
 		max = false
+		win64dir = ""
+#		win64dir = "x64" if x64?
 
 		foldername = projectdir.split("/").last
 		
@@ -1340,7 +1342,7 @@ else
 						else
 							lib_dir = lib.split "/"
 							lib = lib_dir.pop
-							lib += "_x64" if win64
+							lib += "_x64" if win64?
 							lib_dir = lib_dir.join "/"
 
 							lib_dir.gsub!(/(\/)/,'\\')
@@ -1389,7 +1391,7 @@ else
 						else
 							lib_dir = lib.split "/"
 							lib = lib_dir.pop
-							lib += "_x64" if win64
+							lib += "_x64" if win64?
 							lib_dir = lib_dir.join "/"
 
 							lib_dir.gsub!(/(\/)/,'\\')
@@ -1571,9 +1573,21 @@ else
 					# vcproj_release64_postbuild.elements["Command"].text = "#{command}"
 					# vcproj_release64.add_element vcproj_release64_postbuild
 					
-				# else
-					# cp les modules dans externals et les renommer en mxe
+				else
+					command = "copy $(OutDir)$(ProjectName).mxe #{path_to_moduleroot}/Jamoma/externals"
+					command.gsub!(/(\/)/,'\\')
+					command.gsub!(/(\r)/,'')
+					command.gsub!(/(\n)/,'')
 					
+					vcproj_debug32_postbuild = Element.new "PostBuildEvent"
+					vcproj_debug32_postbuild.add_element Element.new "Command"
+					vcproj_debug32_postbuild.elements["Command"].text = command
+					vcproj_debug32.add_element vcproj_debug32_postbuild
+										
+					vcproj_release32_postbuild = Element.new "PostBuildEvent"
+					vcproj_release32_postbuild.add_element Element.new "Command"
+					vcproj_release32_postbuild.elements["Command"].text = command
+					vcproj_release32.add_element vcproj_release32_postbuild			
 				end
 				
 				

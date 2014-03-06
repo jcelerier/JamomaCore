@@ -14,13 +14,13 @@ using namespace boost;
 using namespace std;
 typedef boost::regex	TTExpression;
 //typedef boost::match_results <TTRegexStringPosition> TTRegexStringResult;
-typedef boost::match_results <TTStringIter> TTRegexStringResult;
+typedef boost::match_results <std::string::iterator> TTRegexStringResult;
 #else
 #include <regex>
 using namespace std;
 typedef std::regex	TTExpression;
 //typedef std::match_results <TTRegexStringPosition> TTRegexStringResult;
-typedef std::match_results <TTStringIter> TTRegexStringResult;
+typedef std::match_results <std::string::iterator> TTRegexStringResult;
 #endif
 
 #define EXPRESSION  ((TTExpression*)(mExpression))
@@ -53,7 +53,7 @@ TTRegex::~TTRegex()
 }
 
 //TTErr TTRegex::parse(TTRegexStringPosition& begin, TTRegexStringPosition& end)
-TTErr TTRegex::parse(TTStringIter& begin, TTStringIter& end)
+TTErr TTRegex::parse(std::string::iterator& begin, std::string::iterator& end)
 {
 	if (regex_search(begin, end, mRESULT, mEXPRESSION))
 		return kTTErrNone;
@@ -63,7 +63,7 @@ TTErr TTRegex::parse(TTStringIter& begin, TTStringIter& end)
 
 /** Get where start the result */
 //TTRegexStringPosition TTRegex::begin()
-TTStringIter TTRegex::begin()
+std::string::iterator TTRegex::begin()
 {
 #if BOOST_REGEX
 	return mRESULT[1].first;
@@ -74,7 +74,7 @@ TTStringIter TTRegex::begin()
 
 /** Get where end the result */
 //TTRegexStringPosition TTRegex::end()
-TTStringIter TTRegex::end()
+std::string::iterator TTRegex::end()
 {
 #if BOOST_REGEX
 	return mRESULT[1].second;

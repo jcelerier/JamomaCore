@@ -926,8 +926,14 @@ TTBoolean testNodeUsingFilter(TTNodePtr n, TTPtr args)
 				TTBoolean resultInstance = YES;
 				
 				TTRegex* aRegex;
-				TTString s_toParse;
-				TTStringIter begin, end;
+
+				// It is okay to use std::string here because we are completely certain that the string will NOT be passed
+				// outside of the boundaries of the Foundation lib (it won't go to functions in an extension or anywhere else)
+				// We want to use std::string() because the interface for REGEX uses iterators which we don't have available for TTString
+				// (they are not available for TTString because TTString is designed to be safe for passing across library boundaries)
+
+				std::string s_toParse;
+				std::string::iterator begin, end;
 				
 				// get filter
 				aFilter = TTDictionaryBasePtr((TTPtr)v[0]);

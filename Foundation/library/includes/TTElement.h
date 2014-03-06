@@ -330,8 +330,9 @@ public:
 		if (mType == kTypeString)
 			return *mValue.stringPtr;
 		else
-			return *(new TTString(""));
-		// TODO: This will cause a memory leak if there is an error, right?
+			//			return *(new TTString(""));
+			// TODO: This will cause a memory leak if there is an error, right?
+			return TTString();
 	}
 
 	// OBJECT
@@ -490,13 +491,10 @@ public:
 	
 	TTElement& operator = (const TTString value)
 	{
-		//		if (!stringsPresent && *type != kTypeString)
-		//			data->stringPtr = new TTString;
 		if (mType != kTypeString)
 			mValue.stringPtr = new TTString;
 		mType = kTypeString;
-		//		stringsPresent = true;
-		*mValue.stringPtr = value;
+		(*mValue.stringPtr) = value;
 		return *this;
 	}
 	

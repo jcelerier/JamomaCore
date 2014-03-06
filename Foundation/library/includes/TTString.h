@@ -31,150 +31,83 @@
 
 	@seealso TTSymbol
 */
-class TTString : public std::vector<char> {	
-	
+
+class TTFOUNDATION_EXPORT TTString {
 public:
-	
+	TTPtr	mVector;	//	pointer to std::vector<char>, left public so it can be easily accessed by functors and helper methods
+
 	/** Constructor */
-	TTString(const char *aCString = "")
-	{
-		assign(aCString);
-	}
+	TTString(const char *aCString = "");	
 	
+	TTString(const std::string& aStdString);
 	
-	TTString(const std::string& aStdString)
-	{
-		assign(aStdString);
-	}
-	
-	
-	TTString(std::vector<char>::iterator begin, std::vector<char>::iterator end)
-	{
-		TTPtrSizedInt newsize = (end - begin);
-		
-		reserve(newsize+16);
-		for (std::vector<char>::iterator c = begin; c != end; ++c) {
-			push_back(*c);
-		}
-		
-		// In some cases the range has NULL termination included, in other cases not.
-		// In these cases we need to correct the size of the string to match the C-String.
-		// If we don't then two strings with identical contents (e.g. "foo" and "foo") will hash to different values.
-		// If then looked-up in the symbol table we corrupt the symbol table with two entries for the same string!
-		TTBoolean resized = NO;
-		
-		for (TTPtrSizedInt i=newsize-1; i>0; i--) {
-			if (at(i) != 0) {
-				resize(i+1);
-				resized = YES;
-				break;
-			}
-		}
-		if (!resized)
-			resize(newsize); // ensure NULL termination
-	}
+	TTString(std::vector<char>::iterator begin, std::vector<char>::iterator end);
+
+	TTString(const TTString& other);
 	
 	/** Destructor */
-	~TTString()
-	{}
+	~TTString();
+
+	char& at(size_t index) const;
+
+	void push_back(char c);
+
+	void clear();
+
+	bool empty();
+
+	void reserve(size_t size);
+
+	size_t capacity();
 	
+	const char* data();
 	
 	/** Return a pointer to the internal C-string */
-	const char* c_str() const
-	{
-		return &this->at(0);
-	}
+	const char* c_str() const;
 	
 	
 	/** Cast to a C-string. */
 	operator const char*() const
 	{
-		//return mData;
-		return &this->at(0);
+		std::vector<char>* my_vector = (std::vector<char>*)mVector;
+		return &my_vector->at(0);
 	}
-	
 	
 	/** Assign from a C-string. */
-	TTString& operator = (const char* aCString)
-	{
-		assign(aCString);
-		return *this;
-	}
-	
+	TTString& operator = (const char* aCString);
 	
 	/** Assign from a std::string. */
-	TTString& operator = (std::string& aStdString)
-	{
-		assign(aStdString);
-		return *this;
-	}
-	
+	TTString& operator = (std::string& aStdString);
 	
 	/** Assign from a simple char. */
-	TTString& operator = (const char aChar)
-	{
-		resize(1);
-		at(0) = aChar;
-		return *this;
-	}
-	
+	TTString& operator = (const char aChar);
 	
 	/** Overload to assign from a C-string. */
-	void assign(const char* aCString, size_t length=0)
-	{
-		if (length == 0) // no length defined, so check the c-string in the traditional way
-			length = strlen(aCString);
-		
-		if ((length+1) >= capacity())
-			reserve(length+16);
-				
-		resize(length);		
-		memcpy(&this->at(0), aCString, length);
-	}
-	
+	void assign(const char* aCString, size_t length = 0);
 	
 	/** Assign from a std::string. */
-	void assign(const std::string& aStdString)
-	{
-		assign(aStdString.c_str(), aStdString.length());
-	}
-	
+	void assign(const std::string& aStdString);
 	
 	/** Find out the length of a string.  */
-	size_t size() const
-	{
-		return std::vector<char>::size() - 1;
-	}
-	
+	size_t size() const;
 	
 	/** Find out the length of a string.  */
-	size_t length() const
-	{
-		return size();
-	}
-	
+	size_t length() const;
 	
 	// because when size() == 0 there is still a char (null terminator) in the vector, we have to override this
-	bool empty() const
-	{
-		return size() == 0;
-	}
-	
+	bool empty() const;
+
 	/** Allocate  memory for the string. */
-	void resize(size_t newSize)
-	{
-		std::vector<char>::resize(newSize + 1);
-		this->at(newSize) = 0; // NULL terminate for safety
-	}
+	void resize(size_t newSize);
 	
-	
+
 	template<class T>
 	TTString& operator += (const T& arg)
 	{
 		append(arg);
 		return (*this);
 	}
-	
+
 
 	template<class T>
 	TTString& operator += (const TTString& anotherString)
@@ -182,235 +115,91 @@ public:
 		append(anotherString.c_str(), anotherString.length());
 		return (*this);
 	}
-	
-	
+
+
 	template<class T>
 	TTString& operator += (const std::string& aStdString)
 	{
 		append(aStdString.c_str(), aStdString.length());
 		return (*this);
 	}
-	
-	
+
 	/** Append / Concatenate */
-	void append(const char *str, size_t length=0)
-	{
-		if (!str)
-			return;
-		
-		if (length == 0)
-			length = strlen(str);
-		
-		size_t oldSize = size();
-		size_t newSize = oldSize + length;
-		
-		if (newSize >= capacity())
-			reserve(newSize + 256);
-		
-		resize(newSize);
-		memcpy(&this->at(oldSize), str, length);
-	}
-	
-	
-	void append(const char aChar)
-	{
-		char s[2];
-		
-		snprintf(s, 2, "%c", aChar);
-		append(s);
-	}
-	
-	
-	void append(int anInt)
-	{
-		char s[16];
-		
-		snprintf(s, 16, "%i", anInt);
-		append(s);
-	}
+	void append(const char *str, size_t length = 0);
+	void append(const char aChar);
+	void append(int anInt);
+	void append(unsigned int aUInt);
+	void append(float aFloat);
+	void append(double aDouble);
 
-	
-	void append(unsigned int aUInt)
-	{
-		char s[16];
-		
-		snprintf(s, 16, "%u", aUInt);
-		append(s);
-	}
 
-	
-	void append(float aFloat)
-	{
-		char s[16];
-		
-		snprintf(s, 16, "%f", aFloat);
-		append(s);
-	}
-	
-	
-	void append(double aDouble)
-	{
-		char s[16];
-		
-		snprintf(s, 16, "%lf", aDouble);
-		append(s);
-	}
-	
-	
-	template<class T>
-	TTString operator + (const T& arg)
-	{
-		TTString result = *this;	// Make a copy of myself
-		result += arg;				// Use += to add arg to the copy.
-		return result;
-	}
-	
-	
-	bool operator == (const char *cString) const
-	{
-		const TTString s(cString);
-		return (*this) == s;
-	}
-	
-	bool operator == (const TTString &other) const
-	{
-		return *dynamic_cast<const std::vector<char>*>(this) == *dynamic_cast<const std::vector<char>*>(&other);
-	}
+//	template<class T>
+//	TTString operator + (const T& arg)
+//	{
+//		TTString result = *this;	// Make a copy of myself
+//		result += arg;				// Use += to add arg to the copy.
+//		return result;
+//	}
 
-	
-	bool operator != (const char *cString) const
-	{
-		return !(*this == cString);
-	}
+	TTString operator + (const char* arg);
 
-	bool operator != (const TTString &other) const
-	{
-		return !(*this == other);
-	}
+
+
+	bool operator == (const char *cString) const;
+	
+	bool operator == (const TTString &other) const;
+
+	bool operator != (const char *cString) const;
+
+	bool operator != (const TTString &other) const;
 
 	
 	/** Return the index of the first instance of a specified char in the string.
 		@param	aChar	The char for which to search
 		@param	from	A position in the string from which to begin the search.  By default it starts at the beginning (0)
 	 */
-	size_t find_first_of(const char aChar, size_t from = 0)
-	{
-		TTBoolean	found = NO;
-		size_t		i;
-		
-		for (i=from; i<size(); i++) {
-			if (at(i) == aChar) {
-				found = YES;
-				break;
-			}
-		}
-		if (found)
-			return i;
-		else
-			return -1;
-	}
+	size_t find_first_of(const char aChar, size_t from = 0);
     
     /** Return the index of the last instance of a specified char in the string.
      @param	aChar	The char for which to search
 	 */
-	size_t find_last_of(const char aChar)
-	{
-		TTBoolean	found = NO;
-		size_t		i, j;
-        
-        j = size() - 1;
-		
-		for (i=0; i<size(); i++) {
-			if (at(j) == aChar) {
-				found = YES;
-				break;
-			} else {
-                j--;
-            }
-		}
-		if (found)
-			return j;
-		else
-			return -1;
-	}
+	size_t find_last_of(const char aChar);
 
 	
 	/** Returns a string object with its contents initialized to a substring of the current object.
 		@param pos	Position of a character in the current string object to be used as starting character for the substring.
 		@param n 	Length of the substring.
 	 */
-	TTString substr (size_t pos = 0, size_t n = 1) const
-	{
-		TTString	substring;
-		size_t		i;
-		
-		if (pos+n > size())		// If the size is too large and thus the range extends past the end of the string...
-			n = size() - pos;	// we limit the range to end at the end of the string.
-		
-		substring.reserve(n+16);
-		substring.resize(n);
-		for (i=0; i<n; i++) {
-			substring[i] = (*this)[pos + i];
-			if (pos+i >= size())
-				break;
-		}
-		return substring;
-	}
+	TTString substr(size_t pos = 0, size_t n = 1) const;
 	
 
 	// This avoids a warning in GCC 4.7 about ambiguity between using an int vs. a size_t where
 	// the int could also be considered an index into a char array
-	char& operator[] (const int index)
-	{
-		return this->at(index);
-	}
+	char& operator[] (const int index);
 	
 	
 	// NOTE: we do not export TTString because it is defined in a header as a subclass of a stl template
 	// but we do want to export this method, which is not defined inline so that we don't pick up a direct
 	// dependency on Mersenne Twister
 	/** Replace contents with a pseudo-random string. */
-	void TTFOUNDATION_EXPORT random();
+	void random();
 	
     
 	
 //	TTBoolean toTTInt32( const TTString & str, TTInt32 & convertedInt )
-	TTBoolean toTTInt32(TTInt32& convertedInt) const
-	{
-		char * pEnd;
-		
-		convertedInt = strtol(c_str(), &pEnd, 10);
-		return *pEnd == 0;
-	}
+	TTBoolean toTTInt32(TTInt32& convertedInt) const;
     
     //	TTBoolean toTTUInt32( const TTString & str, TTInt32 & convertedUInt )
-	TTBoolean toTTUInt32(TTUInt32& convertedUInt) const
-	{
-		char * pEnd;
-        
-		convertedUInt = strtoul(c_str(), &pEnd, 10);
-        
-        // is the last letter is a 'u' ?
-		return *pEnd == 'u' && pEnd == (c_str() + length() - 1);
-	}
+	TTBoolean toTTUInt32(TTUInt32& convertedUInt) const;
 	
 	/*	note : isTTFloat32 works only because the TTInt32 case is matched before
 	 see in TTValue::fromString method
 	 */
 //	TTBoolean toTTFloat32( const TTString & str, TTFloat32 & convertedFloat )
-	TTBoolean toTTFloat32(TTFloat32& convertedFloat) const
-	{
-		char * pEnd;
-		
-		convertedFloat = strtod(c_str(), &pEnd);
-		return *pEnd == 0;
-	}
+	TTBoolean toTTFloat32(TTFloat32& convertedFloat) const;
 
 };
 
-
-/** Iterator for using STL algorithms with TTString. */
-typedef TTString::iterator	TTStringIter;
 
 
 /** Expose TTString for use in std output streams. */
@@ -468,7 +257,8 @@ namespace std
 			public:
 				size_t operator()(const TTString& self) const
 				{
-					size_t hashkey = _Hash_seq((const unsigned char*)self.data(), self.size()); //std::hash(self.data(), self.size());
+					std::vector<char>* my_vector = (std::vector<char>*)self.mVector;
+					size_t hashkey = _Hash_seq((const unsigned char*)my_vector->data(), my_vector->size()); //std::hash(self.data(), self.size());
 					//cout << "HASH: " << self.data() << " with size: " << self.size() << " = " << hashkey << endl;
 					return hashkey;
 				}
@@ -498,6 +288,7 @@ namespace std
 #endif // ifdef clang etc...
 
 #endif // TTFOUNDATION_EXPORTS
+
 
 
 #endif // __TT_STRING_H__

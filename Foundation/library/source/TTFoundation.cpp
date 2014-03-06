@@ -47,7 +47,7 @@
 #include <CoreFoundation/CFBundle.h> 
 #endif
 
-TTString        TTFoundationBinaryPath = "";
+TTString        TTFoundationBinaryPath;
 
 static bool		TTFoundationHasInitialized = false;
 
@@ -62,6 +62,10 @@ void TTFoundationInit(const char* pathToBinaries)
 	if (!TTFoundationHasInitialized) {
 		TTFoundationHasInitialized = true;
 
+
+
+
+
 		if (pathToBinaries)
 			TTFoundationBinaryPath = pathToBinaries;
 
@@ -72,6 +76,8 @@ void TTFoundationInit(const char* pathToBinaries)
 #ifndef DISABLE_NODELIB
 		TTNodeLibInit();
 #endif
+
+
 
 		ttEnvironment = new TTEnvironment;
 
@@ -91,6 +97,9 @@ void TTFoundationInit(const char* pathToBinaries)
 		else
 			TTLogMessage("\n");
 
+
+
+
 		// register classes -- both internal and external
 		TTCallback::registerClass();
 		TTMatrix::registerClass();
@@ -105,7 +114,11 @@ void TTFoundationInit(const char* pathToBinaries)
 		TTNodeLibTest::registerClass();
 #endif
 
+
+
 		TTFoundationLoadExternalClasses();
+
+
 	}
 }
 
@@ -238,9 +251,9 @@ void TTFoundationLoadExternalClasses(void)
 		if (temppath[0]) {
 			fullpath = temppath;
 			// get support folder path
-			fullpath = fullpath.substr(0, fullpath.length() - (strlen(moduleName) + 1));
-			TTFoundationBinaryPath = fullpath;
-			lRes = SHCreateDirectory(NULL, (LPCWSTR)fullpath.c_str());
+			TTFoundationBinaryPath = fullpath.substr(0, fullpath.length() - (strlen(moduleName) + 1));
+//			TTFoundationBinaryPath = fullpath;
+			lRes = SHCreateDirectory(NULL, (LPCWSTR)TTFoundationBinaryPath.c_str());
 			TTFoundationLoadExternalClassesFromFolder(fullpath);
 		}
 	}

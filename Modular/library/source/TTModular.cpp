@@ -42,11 +42,11 @@ TTHashPtr TTModularNamespaces = NULL;
 
 void TTModularInit(const char* pathToTheJamomaFolder)
 {
-    TTValue v, none;
-    
+	TTValue v, none;
+
 	// Initialized Foundation framework
 	TTFoundationInit(pathToTheJamomaFolder);
-    
+
 //#define TO_DEBUG
 #ifdef TO_DEBUG
 
@@ -59,7 +59,7 @@ void TTModularInit(const char* pathToTheJamomaFolder)
 	if (!TTModularHasInitialized) {
 		
 		TTModularHasInitialized = true;
-		
+	
 		// register classes -- both internal and external
 		TTApplication::registerClass();
 		TTApplicationManager::registerClass();
@@ -89,18 +89,7 @@ void TTModularInit(const char* pathToTheJamomaFolder)
 		
 		//TTModularValueCacheInit();
 		
-		// to - this a very strange bug : the two first toString() parsing on number failed !?!
-		// so here are two parsing to avoid this strange bug for instant ...
-		TTString s;
-		
-		s = "0.001";
-		v = s;
-		v.fromString();
-		
-		v.clear();
-		s = "1";
-		v = s;
-		v.fromString();
+
 		
 		// Create the Modular application manager with no application inside
 		TTObjectBaseInstantiate(kTTSym_ApplicationManager, TTObjectBaseHandle(&TTModularApplications), none);

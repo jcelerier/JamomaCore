@@ -228,30 +228,30 @@ TTErr TTAddressBase::parse()
 	}
 	
 	// All other case needs a regex parsing
-	TTString s_toParse = this->getCString();
-	TTString s_before;
-	TTString s_after;
-	TTString s_directory;
-	TTString s_parent;
-	TTString s_name;
-	TTString s_instance;
-	TTString s_attribute;
+	std::string s_toParse = this->getCString();
+	std::string s_before;
+	std::string s_after;
+	std::string s_directory;
+	std::string s_parent;
+	std::string s_name;
+	std::string s_instance;
+	std::string s_attribute;
 
-	TTStringIter begin = s_toParse.begin();
-	TTStringIter end = s_toParse.end();
+	std::string::iterator begin = s_toParse.begin();
+	std::string::iterator end = s_toParse.end();
 	
 	//cout << "*** s_toParse    " << s_toParse << "    ***" << endl;
 	
 	// parse directory
 	if (!ttRegexForDirectory->parse(begin, end))
 	{
-		TTStringIter temp_begin = ttRegexForDirectory->begin();
-		TTStringIter temp_end = ttRegexForDirectory->end();
+		std::string::iterator temp_begin = ttRegexForDirectory->begin();
+		std::string::iterator temp_end = ttRegexForDirectory->end();
 		
-		s_directory = TTString(temp_begin, temp_end);
+		s_directory = TTString(std::string(temp_begin, temp_end));
 		
 		temp_begin = ttRegexForDirectory->end()+1;
-		s_toParse = TTString(temp_begin, end);                              // +1 to remove ":"
+		s_toParse = TTString(std::string(temp_begin, end));                              // +1 to remove ":"
 		
 		begin = s_toParse.begin();
 		end = s_toParse.end();
@@ -278,11 +278,11 @@ TTErr TTAddressBase::parse()
 	// parse attribute
 	if (!ttRegexForAttribute->parse(begin, end))
 	{
-		TTStringIter temp_begin = ttRegexForAttribute->begin();
-		TTStringIter temp_end = ttRegexForAttribute->end();
+		std::string::iterator temp_begin = ttRegexForAttribute->begin();
+		std::string::iterator temp_end = ttRegexForAttribute->end();
 		
-		s_attribute = TTString(temp_begin, end);
-		s_toParse = TTString(begin, temp_end-1);                            // -1 to remove ":"
+		s_attribute = std::string(temp_begin, end);
+		s_toParse = std::string(begin, temp_end - 1);                            // -1 to remove ":"
 		
 		begin = s_toParse.begin();
 		end = s_toParse.end();
@@ -303,13 +303,12 @@ TTErr TTAddressBase::parse()
 		else if (this->directory != kTTSymEmpty) {
             s_parent = s_directory;
             s_parent += ":";
-            s_parent += TTString(ttRegexForParent->begin(), ttRegexForParent->end());
+            s_parent += TTString(std::string(ttRegexForParent->begin(), ttRegexForParent->end()));
         }
-
         else
-			s_parent += TTString(ttRegexForParent->begin(), ttRegexForParent->end());
+			s_parent += TTString(std::string(ttRegexForParent->begin(), ttRegexForParent->end()));
 		
-		s_toParse = TTString(ttRegexForParent->end()+1, end-1);               // +1 to remove "/", -1 to remove a useless \0
+		s_toParse = TTString(std::string(ttRegexForParent->end()+1, end-1));               // +1 to remove "/", -1 to remove a useless \0
 		
 		begin = s_toParse.begin();
 		end = s_toParse.end();
@@ -322,8 +321,8 @@ TTErr TTAddressBase::parse()
 	// parse instance
 	if (!ttRegexForInstance->parse(begin, end))
 	{
-		s_instance = TTString(ttRegexForInstance->end(), end-1);            // -1 to remove a '\0' at the end
-		s_toParse = TTString(begin, ttRegexForInstance->begin()-1);			// -1 to remove "."
+		s_instance = TTString(std::string(ttRegexForInstance->end(), end-1));            // -1 to remove a '\0' at the end
+		s_toParse = TTString(std::string(begin, ttRegexForInstance->begin()-1));			// -1 to remove "."
 		
 		begin = s_toParse.begin();
 		end = s_toParse.end();
@@ -440,7 +439,7 @@ TTErr TTAddressBase::splitAt(TTUInt32 whereToSplit, TTAddressBase* *returnedPart
 {
 	TTErr		err = kTTErrNone;
 	TTUInt32	nb, pos, i;
-	TTString	part1, part2;
+	std::string	part1, part2;
 	
 	i = 0;
 	part1 = "";

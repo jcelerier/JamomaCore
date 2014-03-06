@@ -453,10 +453,13 @@ public:
 	
 	void fromString(TTBoolean numberAsSymbol = NO)
 	{
-		if (at(0).type() != kTypeString) {
+		if (size() == 0 || at(0).type() != kTypeString || ((TTString)at(0)).size()<2) {
 			clear();
 			return;
 		}
+
+		// TODO: In this function we currently leak the TTString's memory because we replace it's entry in the TTValue
+		// but never free the pointer.
 					
 		TTUInt32					n = 0;
 		TTInt32						convertedInt;
@@ -465,7 +468,7 @@ public:
 		std::vector<std::string>	strList;
 		std::string					str(TTString(at(0)));
 		std::istringstream			iss(str);
-		
+
 		std::copy(
 				  std::istream_iterator<std::string>( iss ),
 				  std::istream_iterator<std::string>(),

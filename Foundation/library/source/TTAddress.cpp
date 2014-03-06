@@ -21,28 +21,31 @@ TTFOUNDATION_EXPORT TTRegex* ttRegexForInstanceZero = NULL;
 
 TTErr TTAddress::parseInstanceZero(const char* cstr, TTString& parsed)
 {
+	std::string temp;
+
     // filter single "0" string
-    TTString toParse(cstr);
+	std::string toParse(cstr);
     if (toParse.size() > 1) {
         
-        parsed = toParse;
+		temp = toParse;
         
-        TTStringIter begin = parsed.begin();
-        TTStringIter end = parsed.end();
+		std::string::iterator begin = temp.begin();
+		std::string::iterator end = temp.end();
         
         // parse and remove ".0"
         while (!ttRegexForInstanceZero->parse(begin, end)) {
-            TTStringIter z_begin = ttRegexForInstanceZero->begin() - 2;
-            TTStringIter z_end = ttRegexForInstanceZero->end();
+			std::string::iterator z_begin = ttRegexForInstanceZero->begin() - 2;
+			std::string::iterator z_end = ttRegexForInstanceZero->end();
             
-            TTString a(begin, z_begin);
-            TTString b(z_end, end);
+			std::string a(begin, z_begin);
+			std::string b(z_end, end);
             parsed = a+b;
             
-            begin = parsed.begin();
-            end = parsed.end();
+			begin = temp.begin();
+			end = temp.end();
         }
     }
-    
+
+	parsed = temp.c_str();
     return kTTErrNone;
 }

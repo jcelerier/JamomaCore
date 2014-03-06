@@ -47,7 +47,7 @@ public:
 		@param	end						the end of the string to parse
 		@return							a error code	*/
 //	TTErr parse(TTRegexStringPosition& begin, TTRegexStringPosition& end);
-	TTErr parse(TTStringIter& begin, TTStringIter& end);
+	TTErr parse(std::string::iterator& begin, std::string::iterator& end);
 	
 //	TTErr parse(TTRegexStringIterator& begin, TTRegexStringIterator& end)
 //	{
@@ -56,11 +56,11 @@ public:
 
 	/** Get where start the result */
 	//TTRegexStringPosition	begin();
-	TTStringIter	begin();
+	std::string::iterator	begin();
 	
 	/** Get where end the result */
 	//TTRegexStringPosition	end();
-	TTStringIter	end();
+	std::string::iterator	end();
 };
 
 	
