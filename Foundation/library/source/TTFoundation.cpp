@@ -251,10 +251,12 @@ void TTFoundationLoadExternalClasses(void)
 		if (temppath[0]) {
 			fullpath = temppath;
 			// get support folder path
-			TTFoundationBinaryPath = fullpath.substr(0, fullpath.length() - (strlen(moduleName) + 1));
-//			TTFoundationBinaryPath = fullpath;
-			lRes = SHCreateDirectory(NULL, (LPCWSTR)TTFoundationBinaryPath.c_str());
-			TTFoundationLoadExternalClassesFromFolder(fullpath);
+			
+				TTString substring = fullpath.substr(0, fullpath.length() - (strlen(moduleName) + 1));
+				lRes = SHCreateDirectory(NULL, (LPCWSTR)substring.c_str());
+				TTFoundationLoadExternalClassesFromFolder(substring);
+
+			TTFoundationBinaryPath = substring;
 		}
 	}
 

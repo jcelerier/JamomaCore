@@ -10,7 +10,7 @@
 #include "MersenneTwister.h"
 
 
-#define VECTOR ((std::vector<char>*)mVector)
+#define VECTOR ((std::string*)mVector)
 
 void TTString::random()
 {
@@ -30,7 +30,6 @@ TTString::TTString(const char *aCString) :
 mVector(NULL)
 {
 	assign(aCString);
-	TTLogDebug("TTString NEW %p %s\n", this, aCString);
 }
 
 
@@ -38,19 +37,18 @@ TTString::TTString(const std::string& aStdString) :
 mVector(NULL)
 {
 	assign(aStdString);
-	TTLogDebug("TTString NEW %p %s\n", this, aStdString.c_str());
 }
 
-
-TTString::TTString(std::vector<char>::iterator begin, std::vector<char>::iterator end) :
+/*
+TTString::TTString(std::string::iterator begin, std::string::iterator end) :
 mVector(NULL)
 {
 	TTPtrSizedInt newsize = (end - begin);
 
-	mVector = new std::vector<char>;
+	mVector = new std::string;
 
 	reserve(newsize + 16);
-	for (std::vector<char>::iterator c = begin; c != end; ++c) {
+	for (std::string::iterator c = begin; c != end; ++c) {
 		push_back(*c);
 	}
 
@@ -61,7 +59,7 @@ mVector(NULL)
 	TTBoolean resized = NO;
 
 	for (TTPtrSizedInt i = newsize - 1; i>0; i--) {
-		if (at(i) != 0) {
+		if (VECTOR->at(i) != 0) {
 			resize(i + 1);
 			resized = YES;
 			break;
@@ -70,6 +68,7 @@ mVector(NULL)
 	if (!resized)
 		resize(newsize); // ensure NULL termination
 }
+*/
 
 TTString::TTString(const TTString& other) :
 mVector(NULL)
@@ -85,7 +84,11 @@ TTString::~TTString()
 
 char& TTString::at(size_t index) const
 {
-	return VECTOR->at(index);
+	std::string& vec = *VECTOR;
+	if (vec.empty())
+		return *new char(0);
+	else
+		return vec.at(index);
 }
 
 
@@ -103,29 +106,25 @@ const char* TTString::data()
 /** Return a pointer to the internal C-string */
 const char* TTString::c_str() const
 {
-	std::vector<char>& vec = *VECTOR;
-	return &vec[0];
+	return VECTOR->c_str();
 }
 
 
 void TTString::clear()
 {
-	resize(0); // we call this instead of clear() on the vector because when we are empty we still have a string with 1 NULL termination char
+	VECTOR->clear();
 }
 
 
 bool TTString::empty()
 {
-	if (size() < 2) // empty means we have only 1 char (a NULL terminator)
-		return true;
-	else
-		return false;
+	return VECTOR->empty();
 }
 
 
 void TTString::reserve(size_t size)
 {
-	return VECTOR->reserve(size);
+	VECTOR->reserve(size);
 }
 
 size_t TTString::capacity()
@@ -163,13 +162,14 @@ TTString& TTString::operator = (const char aChar)
 void TTString::assign(const char* aCString, size_t length)
 {
 	if (!mVector)
-		mVector = new std::vector<char>;
+		mVector = new std::string;
 
 	if (length == 0) { // no length defined, so check the c-string in the traditional way
 		if (aCString)
 			length = strlen(aCString);
 	}
 
+	/*
 	if ((length + 1) >= capacity())
 		reserve(length + 16);
 
@@ -181,6 +181,9 @@ void TTString::assign(const char* aCString, size_t length)
 //		vec.resize(vec.size() + 1);
 		vec[vec.size() - 1] = 0;
 	}
+	*/
+//	if (length && aCString)
+		VECTOR->assign(aCString, length);
 }
 
 
@@ -194,7 +197,7 @@ void TTString::assign(const std::string& aStdString)
 /** Find out the length of a string.  */
 size_t TTString::size() const
 {
-	return VECTOR->size() - 1;
+	return VECTOR->size();
 }
 
 
@@ -208,20 +211,21 @@ size_t TTString::length() const
 // because when size() == 0 there is still a char (null terminator) in the vector, we have to override this
 bool TTString::empty() const
 {
-	return size() == 0;
+	return empty();
 }
 
 /** Allocate  memory for the string. */
 void TTString::resize(size_t newSize)
 {
-	VECTOR->resize(newSize+1);
-	at(newSize) = 0; // NULL terminate for safety
+	VECTOR->resize(newSize);
 }
 
 
 /** Append / Concatenate */
 void TTString::append(const char *str, size_t length)
 {
+	VECTOR->append(str, length);
+	/*
 	if (!str)
 		return;
 
@@ -236,6 +240,7 @@ void TTString::append(const char *str, size_t length)
 
 	resize(newSize);
 	memcpy(&this->at(oldSize), str, length);
+	*/
 }
 
 
@@ -301,7 +306,10 @@ bool TTString::operator == (const char *cString) const
 
 bool TTString::operator == (const TTString &other) const
 {
-	return *VECTOR == *((std::vector<char>*)(other.mVector));
+	std::string& thisvec = *VECTOR;
+	std::string& othervec = *((std::string*)other.mVector);
+
+	return thisvec == othervec;
 }
 
 
@@ -390,7 +398,8 @@ TTString TTString::substr(size_t pos, size_t n) const
 // the int could also be considered an index into a char array
 char& TTString::operator[] (const int index)
 {
-	return this->at(index);
+	std::string& vec = *VECTOR;
+	return vec[index];
 }
 
 

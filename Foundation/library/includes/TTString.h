@@ -41,7 +41,7 @@ public:
 	
 	TTString(const std::string& aStdString);
 	
-	TTString(std::vector<char>::iterator begin, std::vector<char>::iterator end);
+//	TTString(std::vector<char>::iterator begin, std::vector<char>::iterator end);
 
 	TTString(const TTString& other);
 	
@@ -257,7 +257,7 @@ namespace std
 			public:
 				size_t operator()(const TTString& self) const
 				{
-					std::vector<char>* my_vector = (std::vector<char>*)self.mVector;
+					std::string* my_vector = (std::string*)self.mVector;
 					size_t hashkey = _Hash_seq((const unsigned char*)my_vector->data(), my_vector->size()); //std::hash(self.data(), self.size());
 					//cout << "HASH: " << self.data() << " with size: " << self.size() << " = " << hashkey << endl;
 					return hashkey;
