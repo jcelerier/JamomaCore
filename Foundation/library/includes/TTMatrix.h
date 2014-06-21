@@ -68,13 +68,33 @@ public:
 	/** @copydoc TTMatrixBase::getColumnCount()
      */
 	TTColumnID getColumnCount() const;
+    
+    
+    /** @copydoc TTMatrixBase::getTypeAsDataType()
+     */
+    TTDataType	getTypeAsDataType();
+    
+    
+    /** @copydoc TTMatrixBase::getTypeAsSymbol()
+     */
+    TTSymbol getTypeAsSymbol();
+    
+    
+    /** @copydoc TTMatrixBase::getTypeAsDataInfo()
+     */
+    TTDataInfoPtr getTypeAsDataInfo();
 
+    
+    /** @copydoc TTMatrixBase::getDataCount()
+     */
+    TTUInt32 getDataCount();
 	
+    
 	/** @copydoc TTMatrixBase::getComponentStride()
      */
 	TTUInt32 getComponentStride() const;
-
-		
+    
+    
 	/** @copydoc TTMatrixBase::get2d()
      */
 	template<typename T>

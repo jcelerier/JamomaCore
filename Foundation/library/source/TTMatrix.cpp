@@ -51,9 +51,32 @@ TTColumnID TTMatrix::getColumnCount() const
 }
 
 
+TTDataType	TTMatrix::getTypeAsDataType()
+{
+    return instance()->getTypeAsDataType();
+}
+
+
+TTSymbol TTMatrix::getTypeAsSymbol()
+{
+    return instance()->getTypeAsSymbol();
+}
+
+
+TTDataInfoPtr TTMatrix::getTypeAsDataInfo()
+{
+    return instance()->getTypeAsDataInfo();
+}
+
+
+TTUInt32 TTMatrix::getDataCount()
+{
+    return instance()->getDataCount();
+}
+
+
 TTUInt32 TTMatrix::getComponentStride() const
 {
 	return instance()->getComponentStride();
 }
-
 
