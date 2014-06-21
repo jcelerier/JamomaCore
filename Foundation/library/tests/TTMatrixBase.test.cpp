@@ -15,39 +15,6 @@ TTErr TTMatrixBase::test(TTValue& returnedTestInfo)
 {
 	int	errorCount = 0;
 	int testAssertionCount = 0;
-	
-
-	
-    {
-        // an attempt to re-write without using TTObjectBaseInstantiate
-        TTTestLog("\n");
-		TTTestLog("Testing new TTMatrixBase Instantiation...");
-        
-        TTMatrixBasePtr testingNewInstantiation = NULL;
-        
-        try {
-            
-            // first instantiate the matrix as a TTObject
-            testingNewInstantiation = new TTMatrixBase(kTTSymEmpty);
-            // second point the TTMatrixBasePtr at it
-            //testingNewInstantiation = (TTMatrixBasePtr)(TTPtr(willThisWork));
-            
-            TTTestLog("matrix instantiates successfully");
-            
-            TTTestLog("Setting to a 1D, float64, matrix with a length of 16 for complex numbers (2 elements per value)");
-            testingNewInstantiation->setAttributeValue("dimensions", 16);
-            testingNewInstantiation->setAttributeValue("type", "float64");
-            testingNewInstantiation->setAttributeValue("elementCount", 2);
-            TTTestLog("If you see this message, it probably worked.");
-            
-        } catch (...) {
-            TTTestLog("matrix did NOT instantiate");
-            return kTTErrInstantiateFailed;
-        }
-        
-        
-        
-    }
     
 	
 	{
@@ -69,63 +36,7 @@ TTErr TTMatrixBase::test(TTValue& returnedTestInfo)
             return kTTErrInstantiateFailed;
         }
 		
-		// a clear series of tests to ensure type switching via TTDataInfo::matchSymbolToDataType() method works
-		TTTestAssertion("default datatype is uint8", 
-						matrix->getTypeAsDataType() == 4, 
-						testAssertionCount,
-						errorCount);
-		matrix->setAttributeValue("type", "float32");
-		TTTestAssertion("changed datatype to float32", 
-						matrix->getTypeAsDataType() == 1, 
-						testAssertionCount,
-						errorCount);
-		matrix->setAttributeValue("type", "float64");
-		TTTestAssertion("changed datatype to float64", 
-						matrix->getTypeAsDataType() == 2, 
-						testAssertionCount,
-						errorCount);
-		matrix->setAttributeValue("type", "int8");
-		TTTestAssertion("changed datatype to int8", 
-						matrix->getTypeAsDataType() == 3, 
-						testAssertionCount,
-						errorCount);
-		matrix->setAttributeValue("type", "uint8");
-		TTTestAssertion("changed datatype to uint8", 
-						matrix->getTypeAsDataType() == 4, 
-						testAssertionCount,
-						errorCount);
-		matrix->setAttributeValue("type", "int16");
-		TTTestAssertion("changed datatype to int16", 
-						matrix->getTypeAsDataType() == 5, 
-						testAssertionCount,
-						errorCount);
-		matrix->setAttributeValue("type", "uint16");
-		TTTestAssertion("changed datatype to uint16", 
-						matrix->getTypeAsDataType() == 6, 
-						testAssertionCount,
-						errorCount);
-		matrix->setAttributeValue("type", "int32");
-		TTTestAssertion("changed datatype to int32", 
-						matrix->getTypeAsDataType() == 7, 
-						testAssertionCount,
-						errorCount);
-		matrix->setAttributeValue("type", "uint32");
-		TTTestAssertion("changed datatype to uint32", 
-						matrix->getTypeAsDataType() == 8, 
-						testAssertionCount,
-						errorCount);
-		matrix->setAttributeValue("type", "int64");
-		TTTestAssertion("changed datatype to int64", 
-						matrix->getTypeAsDataType() == 9, 
-						testAssertionCount,
-						errorCount);
-		matrix->setAttributeValue("type", "uint64");
-		TTTestAssertion("changed datatype to uint64", 
-						matrix->getTypeAsDataType() == 10, 
-						testAssertionCount,
-						errorCount);
-		
-		// start move here
+
 		TTTestLog("Setting to a 1D, float64, matrix with a length of 16 for complex numbers (2 elements per value)");
 		matrix->setAttributeValue("dimensions", 16);
 		matrix->setAttributeValue("type", "float64");
