@@ -53,95 +53,95 @@ void TTMatrixTestInstantiate(int& errorCount, int&testAssertionCount)
 
 
     
-    
-void TTMatrixTestBasics(int& errorCount, int&testAssertionCount)
+
+void TTMatrixTestDataTypes(int& errorCount, int&testAssertionCount)
 {
 
 
     TTTestLog("\n");
-    TTTestLog("Testing TTMatrixBase Basics...");
-    
-    TTErr err;
+    TTTestLog("Testing TTMatrix DataTypes...");
     
     // instantiate a matrix for testing
-    TTMatrixBasePtr matrix = NULL;
-    try {
-        matrix = new TTMatrixBase(kTTSymEmpty);
-        TTTestLog("TTMatrixBase matrix instantiates successfully");
-        
-    } catch (...) {
-        TTTestLog("TTMatrixBase matrix did NOT instantiate");
-        return kTTErrInstantiateFailed;
-    }
+    TTMatrix matrix;
     
     // a clear series of tests to ensure type switching via TTDataInfo::matchSymbolToDataType() method works
     TTTestAssertion("default datatype is uint8", 
-                    matrix->getTypeAsDataType() == 4, 
+                    matrix.getTypeAsDataType() == 4,
                     testAssertionCount,
                     errorCount);
-    matrix->setAttributeValue("type", "float32");
+    matrix.set("type", "float32");
     TTTestAssertion("changed datatype to float32", 
-                    matrix->getTypeAsDataType() == 1, 
+                    matrix.getTypeAsDataType() == 1,
                     testAssertionCount,
                     errorCount);
-    matrix->setAttributeValue("type", "float64");
+    matrix.set("type", "float64");
     TTTestAssertion("changed datatype to float64", 
-                    matrix->getTypeAsDataType() == 2, 
+                    matrix.getTypeAsDataType() == 2,
                     testAssertionCount,
                     errorCount);
-    matrix->setAttributeValue("type", "int8");
+    matrix.set("type", "int8");
     TTTestAssertion("changed datatype to int8", 
-                    matrix->getTypeAsDataType() == 3, 
+                    matrix.getTypeAsDataType() == 3,
                     testAssertionCount,
                     errorCount);
-    matrix->setAttributeValue("type", "uint8");
+    matrix.set("type", "uint8");
     TTTestAssertion("changed datatype to uint8", 
-                    matrix->getTypeAsDataType() == 4, 
+                    matrix.getTypeAsDataType() == 4,
                     testAssertionCount,
                     errorCount);
-    matrix->setAttributeValue("type", "int16");
+    matrix.set("type", "int16");
     TTTestAssertion("changed datatype to int16", 
-                    matrix->getTypeAsDataType() == 5, 
+                    matrix.getTypeAsDataType() == 5,
                     testAssertionCount,
                     errorCount);
-    matrix->setAttributeValue("type", "uint16");
+    matrix.set("type", "uint16");
     TTTestAssertion("changed datatype to uint16", 
-                    matrix->getTypeAsDataType() == 6, 
+                    matrix.getTypeAsDataType() == 6,
                     testAssertionCount,
                     errorCount);
-    matrix->setAttributeValue("type", "int32");
+    matrix.set("type", "int32");
     TTTestAssertion("changed datatype to int32", 
-                    matrix->getTypeAsDataType() == 7, 
+                    matrix.getTypeAsDataType() == 7,
                     testAssertionCount,
                     errorCount);
-    matrix->setAttributeValue("type", "uint32");
+    matrix.set("type", "uint32");
     TTTestAssertion("changed datatype to uint32", 
-                    matrix->getTypeAsDataType() == 8, 
+                    matrix.getTypeAsDataType() == 8,
                     testAssertionCount,
                     errorCount);
-    matrix->setAttributeValue("type", "int64");
+    matrix.set("type", "int64");
     TTTestAssertion("changed datatype to int64", 
-                    matrix->getTypeAsDataType() == 9, 
+                    matrix.getTypeAsDataType() == 9,
                     testAssertionCount,
                     errorCount);
-    matrix->setAttributeValue("type", "uint64");
+    matrix.set("type", "uint64");
     TTTestAssertion("changed datatype to uint64", 
-                    matrix->getTypeAsDataType() == 10, 
+                    matrix.getTypeAsDataType() == 10,
                     testAssertionCount,
                     errorCount);
+
+}
     
+    
+void TTMatrixTestBasics(int& errorCount, int&testAssertionCount)
+    {
     
     TTTestLog("Setting to a 1D, float64, matrix with a length of 16 for complex numbers (2 elements per value)");
-    matrix->setAttributeValue("dimensions", 16);
-    matrix->setAttributeValue("type", "float64");
-    matrix->setAttributeValue("elementCount", 2);
+    
+    TTErr err = kTTErrNone;
+
+    TTMatrix matrix;
+        
+    matrix.set("dimensions", 16);
+    matrix.set("type", "float64");
+    matrix.set("elementCount", 2);
 
     TTTestAssertion("correct amount of data storage calculated", 
-                    matrix->mDataSize == sizeof(TTFloat64) * 16 * 2, 
+                    matrix.getDataCount() == sizeof(TTFloat64) * 16 * 2,
                     testAssertionCount,
                     errorCount);
     TTTestAssertion("correct byte-stride between values calculated", 
-                    matrix->mComponentStride == sizeof(TTFloat64) * 2, 
+                    matrix.getComponentStride() == sizeof(TTFloat64) * 2,
                     testAssertionCount,
                     errorCount);
     
@@ -149,7 +149,7 @@ void TTMatrixTestBasics(int& errorCount, int&testAssertionCount)
     TTValue fv = 6.26;
     fv.append(19.99);
     TTValue fr;
-    matrix->sendMessage("fill", fv, fr);
+    matrix.send("fill", fv, fr);
     
     int fillTestCount = 0;
     for (unsigned int i=0; i < matrix->mDataSize; i += matrix->mComponentStride) {
@@ -190,7 +190,7 @@ void TTMatrixTestBasics(int& errorCount, int&testAssertionCount)
 
     TTValue v(0, 1);// specify the index and real, but forgot the imaginary
     TTValue r;
-    err = matrix->sendMessage("set", v, r);
+    err = matrix.send("set", v, r);
     TTTestAssertion("set message -- error returned when not enough data provided to completely set value", 
                     err != 0, 
                     testAssertionCount,
@@ -203,7 +203,7 @@ void TTMatrixTestBasics(int& errorCount, int&testAssertionCount)
     v[1] = 0;	// index y
     v[2] = 3.14;	// real (no imaginary)
     v[3] = -2;	// real (no imaginary)
-    err = matrix->sendMessage("set", v, r);
+    err = matrix.send("set", v, r);
     TTTestAssertion("set message -- enough data provided to completely set value", 
                     err == kTTErrNone, 
                     testAssertionCount,
@@ -212,14 +212,14 @@ void TTMatrixTestBasics(int& errorCount, int&testAssertionCount)
     v[0] = 10;	// index y
     v[2] = 4;	// real
     v[3] = 1.2;	// imaginary
-    err = matrix->sendMessage("set", v, r);
+    err = matrix.send("set", v, r);
     TTTestAssertion("set message -- enough data provided to completely set value", 
                     err == kTTErrNone, 
                     testAssertionCount,
                     errorCount);
     //TTTestLog("Expected a value of %i, but returned value was %i", kTTErrNone, err);
     TTComplex z(14, 0.92);
-    matrix->set2d(0, 9, z);
+    matrix.set2d(0, 9, z);
     
     /*
     cout << "		";
@@ -235,7 +235,7 @@ void TTMatrixTestBasics(int& errorCount, int&testAssertionCount)
     
     // TODO: would be nice to have a method to compare two matrices!
     int index = 0;
-    for (unsigned int i=0; i < matrix->mDataSize; i += matrix->mComponentStride) {
+    for (unsigned int i=0; i < matrix.getDataCount(); i += matrix->mComponentStride) {
         if (index == 9) {
             if (!TTTestFloatEquivalence(*((TTFloat64*)(matrix->mData+i)), 14.0))
                 count++;
@@ -475,7 +475,7 @@ TTErr TTMatrix::test(TTValue& returnedTestInfo)
     int	errorCount = 0;
     int testAssertionCount = 0;
 
-	
+	TTMatrixTestInstantiate(errorCount,testAssertionCount);
 	
 	
 	return TTTestFinish(testAssertionCount, errorCount, returnedTestInfo);
