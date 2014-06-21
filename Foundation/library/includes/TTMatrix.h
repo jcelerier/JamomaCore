@@ -97,9 +97,15 @@ public:
      */
 	template<typename T>
 	TTErr set2d(TTRowID i, TTColumnID j, TTElementID e, T data);
+    
+    
+    /** Unit test for matrix.
+	 @param returnedTestInfo	The outcome from the performed unit test.
+	 @return					#TTErr error code if the method fails to execute, else #kTTErrNone.
+	 */
+	virtual TTErr test(TTValue& returnedTestInfo);
 	
 };
-
 
 
 #endif // __TT_MATRIX_H__
