@@ -95,6 +95,11 @@ public:
 	TTUInt32 getComponentStride() const;
     
     
+    /** @copydoc TTMatrixBase::getDataSize()
+     */
+    TTUInt32 getDataSize();
+    
+    
 	/** @copydoc TTMatrixBase::get2d()
      */
 	template<typename T>

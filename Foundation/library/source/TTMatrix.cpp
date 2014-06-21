@@ -80,3 +80,8 @@ TTUInt32 TTMatrix::getComponentStride() const
 	return instance()->getComponentStride();
 }
 
+TTUInt32 TTMatrix::getDataSize()
+{
+    return instance()->getDataSize();
+}
+

@@ -206,6 +206,13 @@ public:
 	{
 		return mComponentStride;
 	}
+    
+    /**	Simple data accessor.
+     @return	TTUInt32		the value stored at mDataSize */
+	TTUInt32 getDataSize()
+	{
+		return mDataSize;
+	}
 	
 	/**	Legacy attribute accessor. Will set returnedDimensions as a 2-item TTValue using the values saved as RowCount & ColumnCount.	
 	
