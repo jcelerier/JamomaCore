@@ -128,7 +128,7 @@ void TTMatrixTestBasics(int& errorCount, int&testAssertionCount)
     
     TTTestLog("Setting to a 1D, float64, matrix with a length of 16 for complex numbers (2 elements per value)");
     
-    TTErr err = kTTErrNone;
+    //TTErr err = kTTErrNone;
 
     TTMatrix matrix;
         
@@ -137,7 +137,7 @@ void TTMatrixTestBasics(int& errorCount, int&testAssertionCount)
     matrix.set("elementCount", 2);
 
     TTTestAssertion("correct amount of data storage calculated", 
-                    matrix.getDataCount() == sizeof(TTFloat64) * 16 * 2,
+                    matrix.getDataSize() == sizeof(TTFloat64) * 16 * 2,
                     testAssertionCount,
                     errorCount);
     TTTestAssertion("correct byte-stride between values calculated", 
@@ -152,12 +152,12 @@ void TTMatrixTestBasics(int& errorCount, int&testAssertionCount)
     TTTestLog("");
     TTTestLog("Setting to a 2D image matrix (8-bit int, 4 elements per value for rgba color) with a size of 160 x 120");
     TTValue dims(160, 120);
-    matrix->setAttributeValue("dimensions", dims);
-    matrix->setAttributeValue("type", "uint8");
-    matrix->setAttributeValue("elementCount", 4);
+    matrix.set("dimensions", dims);
+    matrix.set("type", "uint8");
+    matrix.set("elementCount", 4);
     
     TTTestAssertion("correct amount of data storage calculated", 
-                    matrix->mDataSize == sizeof(TTUInt8) * 160 * 120 * 4, 
+                    matrix.getDataSize() == sizeof(TTUInt8) * 160 * 120 * 4, 
                     testAssertionCount,
                     errorCount);
     TTTestAssertion("correct byte-stride between values calculated", 
