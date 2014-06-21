@@ -33,6 +33,7 @@ sources:
   - source/TTSymbolTable.cpp
   - source/TTRegex.cpp
   - tests/TTMatrix.test.cpp
+  - tests/TTMatrixBase.test.cpp
   - tests/TTString.test.cpp
   - tests/TTSymbol.test.cpp
   - tests/TTValue.test.cpp

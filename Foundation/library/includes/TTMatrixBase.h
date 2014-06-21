@@ -624,6 +624,12 @@ public:
 		The resulting matrix is instantiated by this method.
 		You, the caller, are responsible for freeing it.	*/
 	TTMatrixBase* operator - (const TTMatrixBase& B) const;
+    
+    /** Unit test for matrix base class.
+	 @param returnedTestInfo	The outcome from the performed unit test.
+	 @return					#TTErr error code if the method fails to execute, else #kTTErrNone.
+	 */
+	virtual TTErr test(TTValue& returnedTestInfo);
 	
 };
 
