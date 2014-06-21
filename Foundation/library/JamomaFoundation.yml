@@ -24,7 +24,6 @@ sources:
   - tests/TTList.test.cpp
   - source/TTMatrix.cpp
   - source/TTMatrixBase.cpp
-  - source/TTMatrixObject.cpp
   - source/TTMatrixMath.cpp
   - source/TTMatrixArray.cpp
   - source/TTValue.cpp
