@@ -69,7 +69,10 @@ TTAudioGraphSource::TTAudioGraphSource(const TTAudioGraphSource& original) :
 
 TTAudioGraphSource::~TTAudioGraphSource()
 {
-	if (mSourceObject)
+	// checking classPtr instead of valid because if the object bogus valid may be unreachable
+	// why are we checking this at all through?  if the source object was freed then we should have received a notification about it and NULL'd the pointer!
+	// so this is really just a band-aid on a symptom rather than a legit fix for whatever problem is going on...
+	if (mSourceObject && mSourceObject->valid)
 		mSourceObject->unregisterObserverForNotifications(mCallbackHandler);
 	
 	mSourceObject = NULL;
@@ -81,6 +84,7 @@ void TTAudioGraphSource::create()
 {
 	mCallbackHandler.set("function", TTPtr(&TTAudioGraphSourceObserverCallback));
 	mCallbackHandler.set("baton", TTPtr(this));
+	mCallbackHandler.set("notification", "objectFreeing");
 }
 
 
@@ -98,7 +102,7 @@ TTAudioGraphSource& TTAudioGraphSource::operator=(const TTAudioGraphSource& orig
 	
 	create();
 	mOwner = original.mOwner;
-		
+	
 	if (original.mSourceObject && original.mSourceObject->valid)
 		connect(original.mSourceObject, original.mOutletNumber);
 	
@@ -111,9 +115,6 @@ void TTAudioGraphSource::connect(TTAudioGraphObjectBasePtr anObject, TTUInt16 fr
 	mSourceObject = anObject;
 	mOutletNumber = fromOutletNumber;
 
-	// dynamically add a message to the callback object so that it can handle the 'objectFreeing' notification
-	mCallbackHandler.instance()->registerMessage(TT("objectFreeing"), (TTMethod)&TTCallback::notify, kTTMessagePassValue);
-	
 	// tell the source that is passed in that we want to watch it
 	mSourceObject->registerObserverForNotifications(mCallbackHandler);
 }	

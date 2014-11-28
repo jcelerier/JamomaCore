@@ -52,37 +52,138 @@ TTElement::~TTElement()
 }
 
 
-TTElement::operator TTDictionary() const
+void TTElement::chuck()
 {
-	if (mType == kTypeDictionary) {
-		TTBoolean unused;
-		return TTDictionary(TT(mValue.dictionary), unused);
-	}
-	else
-		return TTDictionary();
-	// TODO: should this throw an exception?
-	// otherwise how does the caller know that the empty dictionary is an error?
+	if (mType == kTypeSymbol)
+		delete mValue.mSymbol;
+	// TODO: JamomaCore #281 : review the use of TTAddress
+	//else if (mType == kTypeAddress)
+	//	delete mValue.mAddress;
+	else if (mType == kTypeObject)
+		delete mValue.mObject;
+	else if (mType == kTypeDictionary)
+		delete mValue.mDictionary;
+	mValue.ptr = NULL;
+	mType = kTypeNone;
 }
 
 
-// The equals operator should assign an existing dictionary, not copy it.
+TTElement::operator TTDictionary() const
+{
+	TT_ASSERT(ttvalue_cast_to_dictionary, (mType == kTypeDictionary));
+	return *mValue.mDictionary;
+}
+
+
+TTElement& TTElement::operator = (const TTElement& anOtherValue)
+{
+	chuck();
+	
+	mType = anOtherValue.mType;
+	
+	if (anOtherValue.mType == kTypeSymbol)
+		mValue.mSymbol = new TTSymbol(*anOtherValue.mValue.mSymbol);
+	// TODO: JamomaCore #281 : review the use of TTAddress
+	//else if (anOtherValue.mType == kTypeAddress)
+	//	mValue.mAddress = new TTAddress(*anOtherValue.mValue.mAddress);
+	else if (anOtherValue.mType == kTypeObject)
+		mValue.mObject = new TTObject(*anOtherValue.mValue.mObject);
+	else if (anOtherValue.mType == kTypeDictionary)
+		mValue.mDictionary = new TTDictionary(*anOtherValue.mValue.mDictionary);
+	else
+		mValue = anOtherValue.mValue;
+	
+	return *this;
+}
+
 
 TTElement& TTElement::operator = (const TTDictionary value)
 {
 	chuck();
-	
-	TTBoolean unused;
-
-	if (mType != kTypeDictionary) {
-		TTDictionary *newDictionary = new TTDictionary(value.name(), unused);
-		mValue.dictionary = (TTSymbolBase*)newDictionary->name().rawpointer();
-		mType = kTypeDictionary;
-	}
-	else {
-		TTDictionary thisDictionary(TT(mValue.dictionary), unused);
-		thisDictionary = value;
-	}
-	
+	mType = kTypeDictionary;
+	mValue.mDictionary = new TTDictionary(value);
 	return *this;
+}
+
+
+bool operator == (const TTElement& a1, const TTElement& a2)
+{
+	if (a1.mType != a2.mType)
+		return false;
+	else {
+		switch (a1.mType) {
+			case kTypeInt8:
+				if ( a1.mValue.int8 != a2.mValue.int8 )
+					return false;
+				break;
+			case kTypeUInt8:
+				if ( a1.mValue.uint8 != a2.mValue.uint8 )
+					return false;
+				break;
+			case kTypeInt16:
+				if ( a1.mValue.int16 != a2.mValue.int16 )
+					return false;
+				break;
+			case kTypeUInt16:
+				if ( a1.mValue.uint16 != a2.mValue.uint16 )
+					return false;
+				break;
+			case kTypeInt32:
+				if ( a1.mValue.int32 != a2.mValue.int32 )
+					return false;
+				break;
+			case kTypeUInt32:
+				if ( a1.mValue.uint32 != a2.mValue.uint32 )
+					return false;
+				break;
+			case kTypeInt64:
+				if ( a1.mValue.int64 != a2.mValue.int64 )
+					return false;
+				break;
+			case kTypeUInt64:
+				if ( a1.mValue.uint64 != a2.mValue.uint64 )
+					return false;
+				break;
+			case kTypeFloat32:
+				if ( a1.mValue.float32 != a2.mValue.float32 )
+					return false;
+				break;
+			case kTypeFloat64:
+				if ( a1.mValue.float64 != a2.mValue.float64 )
+					return false;
+				break;
+			case kTypeBoolean:
+				if ( a1.mValue.boolean != a2.mValue.boolean )
+					return false;
+				break;
+			case kTypeSymbol:
+				if ( *a1.mValue.mSymbol != *a2.mValue.mSymbol )
+					return false;
+				break;
+			case kTypeString:
+				if ( *a1.mValue.stringPtr != *a2.mValue.stringPtr )
+					return false;
+				break;
+			case kTypeObject:
+				if ( *a1.mValue.mObject != *a2.mValue.mObject )
+					return false;
+				break;
+			case kTypeDictionary:
+				if ( *a1.mValue.mDictionary != *a2.mValue.mDictionary )
+					return false;
+				break;
+			case kTypePointer:
+				if ( a1.mValue.ptr != a2.mValue.ptr )
+					return false;
+				break;
+			case kTypeError:
+				if ( a1.mValue.error != a2.mValue.error )
+					return false;
+				break;
+			default: // the type is not currently handled
+				return false;
+		}
+	}
+	return true;
 }
 

@@ -96,14 +96,7 @@ private:
 		mDictionaryInstance->mReferenceCount++;
 	}
 	
-public:
-	TTDictionary(TTElement* do_not_use_this_unless_your_name_is_ttelement_and_you_are_a_destructor)
-	{
-		mName = TTSymbol(do_not_use_this_unless_your_name_is_ttelement_and_you_are_a_destructor->mValue.dictionary);
-		mDictionaryInstance = gTTDictionaryTable[mName.rawpointer()];
-		// DO NOT INCREASE THE REFERENCE COUNT -- THIS IS A SPECIAL CONSTRUCTOR USED FOR TTELEMENT'S DESTRUCTOR
-	}
-	
+public:	
 	
 	/** Copy Constructor */
 	TTDictionary(const TTDictionary& aSourceDictionary)
@@ -272,10 +265,19 @@ public:
 	
 };
 
+
+/** Compare two dictionaries for equality. */
+bool TTFOUNDATION_EXPORT operator == (const TTDictionary& aDictionary, const TTDictionary& anotherDictionary);
+
+/** Compare two dictionaries for inequality. */
+bool TTFOUNDATION_EXPORT operator != (const TTDictionary& aDictionary, const TTDictionary& anotherDictionary);
+
+
+
 /** Pointer to a #TTDictionary.
  @ingroup typedefs
  */
-typedef TTDictionary* TTDictionaryPtr;
+//typedef TTDictionary* TTDictionaryPtr;
 
 
 #endif // __TT_DICTIONARY_H__

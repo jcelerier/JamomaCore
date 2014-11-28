@@ -42,3 +42,17 @@ TTErr TTDictionary::unregisterObserverForNotifications(const TTObject& anObservi
 	return mDictionaryInstance->unregisterObserverForNotifications(*anObservingObject.instance());
 }
 
+
+
+bool operator == (const TTDictionary& a, const TTDictionary& b)
+{
+	return (a.instance() == b.instance());
+}
+
+
+bool operator != (const TTDictionary& a, const TTDictionary& b)
+{
+	return (a.instance() != b.instance());
+}
+
+
