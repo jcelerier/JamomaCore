@@ -52,7 +52,6 @@ mActive(YES)
 	
 	addAttribute(Dataspace, kTypeSymbol);
 	addAttributeProperty(Dataspace, readOnly, YES);
-    addAttributeProperty(Dataspace, hidden, YES);
 	addAttributeWithSetter(DataspaceUnit, kTypeSymbol);
 	
 	addAttributeWithSetter(Active, kTypeBoolean);
