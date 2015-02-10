@@ -168,8 +168,6 @@ TTErr TTTimeEvent::setState(const TTValue& value)
     if (!flattened)
         mState.send("Flatten");
    */
-   
-    return kTTErrNone;
 }
 
 TTErr TTTimeEvent::getState(TTValue& value)
@@ -183,8 +181,6 @@ TTErr TTTimeEvent::getState(TTValue& value)
      */
     
     value = mState;
-    
-    return  kTTErrNone;
 }
 
 #if 0

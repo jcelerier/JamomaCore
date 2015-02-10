@@ -40,9 +40,7 @@
 #endif
 
 #include <math.h>
-#if defined(TT_PLATFORM_MAC) || defined(TT_PLATFORM_LINUX)
 #include <unistd.h>
-#endif
 #include <map>
 
 #include "TTFoundationAPI.h"
