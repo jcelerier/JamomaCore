@@ -410,12 +410,10 @@ TTErr TTFoundationLoadExternalClassesFromFolder(const TTString& fullpath, bool i
 
 
 //// New method ////
-
-
-
-constexpr TTValue compiledAbsolutePaths()
+using StringVector = std::initializer_list<std::string>;
+StringVector compiledAbsolutePaths()
 {
-	return TTValue{
+    return {
 #if defined(JAMOMA_EXTENSIONS_INSTALL_PREFIX)
 			JAMOMA_EXTENSIONS_INSTALL_PREFIX,
 #endif
@@ -423,27 +421,28 @@ constexpr TTValue compiledAbsolutePaths()
 }
 
 template<typename OS>
-constexpr bool isExtensionFilename(TTString filename)
+bool isExtensionFilename(std::string filename)
 {
 	using namespace std;
 	auto prefix = OS::extensionPrefix();
 	auto res = mismatch(begin(prefix), end(prefix), begin(filename));
 
-	if (res.first == end(prefix))
-	{
+    if (prefix.empty() || res.first == end(prefix))
+    {
 		auto suffix = OS::extensionSuffix();
 		if(filename.length() >= suffix.length())
 		{
-			return (0 == filename.compare (filename.length() - suffix.length(),
-										   suffix.length(),
-										   suffix));
+            return (0 == filename
+                            .compare (filename.length() - suffix.length(),
+                                      suffix.length(),
+                                      suffix));
 		}
 	}
 	return false;
 }
 
 template<typename OS>
-constexpr TTString filenameToExtensionName(TTString name)
+std::string filenameToExtensionName(std::string name)
 {
 	using namespace std;
 
@@ -456,14 +455,17 @@ constexpr TTString filenameToExtensionName(TTString name)
 	auto suffix = OS::extensionSuffix();
 	if(!suffix.empty())
 		name.erase(end(name) - suffix.length(), end(name));
+
+    return name;
 }
 
+#if defined(TT_PLATFORM_MAC) || defined(TT_PLATFORM_LINUX)
 class UnixSpecificInformation
 {
 	public:
-		static constexpr TTValue builtinAbsolutePaths()
+        static StringVector builtinAbsolutePaths()
 		{
-			return TTValue{
+            return {
 				"/usr/lib/jamoma",
 				"/usr/local/lib/jamoma",
 				"/usr/jamoma/lib",
@@ -474,23 +476,25 @@ class UnixSpecificInformation
 		}
 
 		template<typename OS>
-		static bool loadClassesFromFolder(const TTString& fullpath)
-		{
-			TTExtensionInitializationMethod	initializer;
-			TTString						initializerFunctionName;
-			TTErr							err;
-			TTPathVector					paths;
-			TTPathIter						i;
+        static bool loadClassesFromFolder(std::string fullpath)
+        {
+            using namespace std;
+            TTExtensionInitializationMethod	initializer;
+            TTErr							err;
 
 			DIR* dirp = opendir(fullpath.c_str());
+            if(!dirp)
+                return false;
+
 			dirent* dp{};
+            int count = 0; // Number of extensions loaded.
 			while ((dp = readdir(dirp)))
 			{
-				TTString fileName(dp->d_name);
+                string fileName(dp->d_name);
 				if(!isExtensionFilename<OS>(fileName))
 					continue;
 
-				TTString fileFullpath = fullpath + "/" + fileName;
+                string fileFullpath = fullpath + "/" + fileName;
 
 				// Open the shared object
 				void *handle = dlopen(fileFullpath.c_str(), RTLD_LAZY);
@@ -501,229 +505,231 @@ class UnixSpecificInformation
 				}
 
 				// Load the Jamoma extension
-				initializerFunctionName = "TTLoadJamomaExtension_";
-				initializerFunctionName += filenameToExtensionName<OS>(fileName);
+                string initializerFunctionName = "TTLoadJamomaExtension_";
+                initializerFunctionName += filenameToExtensionName<OS>(fileName.c_str());
 
 				initializer = (TTExtensionInitializationMethod) dlsym(handle, initializerFunctionName.c_str());
 				if (initializer)
 				{
-					err = initializer();
+                    err = initializer();
 					if(err != kTTErrNone)
 					{
-						std::cout << "Error " << err
-								  << " when initializing extension " << fileName.c_str()
+                        std::cerr << "Error " << err
+                                  << " when initializing extension " << fileName
 								  << std::endl;
 					}
-				}
+                    else
+                    {
+                        ++count;
+                    }
+                }
 			}
 			closedir(dirp);
 
-			return kTTErrNone;
+            return count != 0;
 		}
 };
+#endif
 
-class OSXSpecificInformation
-{
-	public:
-		static constexpr TTString extensionPrefix()
-		{ return ""; }
-
-		static constexpr TTString extensionSuffix()
-		{ return ".ttdylib"; }
-
-		static TTValue computedRelativePath()
-		{
-			OSErr		err = noErr;
-			TTString	fullpath;
-
-			Dl_info		info;
-			char		mainBundleStr[4096];
-
-			// Use the path of JamomaFoundation.dylib; the extensions should be in an
-			// "extensions" subfolder.
-			if (dladdr((const void*)TTFoundationLoadExternalClasses, &info)) {
-				char *c = 0;
-
-				printf("Loaded from path = %s\n", info.dli_fname);
-				strncpy(mainBundleStr, info.dli_fname, 4096);
-				c = strrchr(mainBundleStr, '/');
-				if (c)
-					*c = 0; // chop the "/JamomaFoundation.dylib off of the path
-
-				// store binary path
-				TTFoundationBinaryPath = mainBundleStr;
-			}
-
-			std::cerr << "Trying to load from: " << mainBundleStr << std::endl;
-			return mainBundleStr;
-		}
-
-		static constexpr TTValue builtinRelativePaths()
-		{
-			return TTValue{"../Frameworks/jamoma/extensions"};
-		}
-
-		static constexpr TTValue compiledAbsolutePaths()
-		{
-			return compiledAbsolutePaths();
-		}
-
-		static constexpr TTValue builtinAbsolutePaths()
-		{
-			return UnixSpecificInformation::builtinAbsolutePaths();
-		}
-
-
-};
-
-class LinuxSpecificInformation
-{
-	public:
-		static constexpr TTString extensionPrefix()
-		{ return ""; }
-
-		static constexpr TTString extensionSuffix()
-		{ return ".ttso"; }
-
-
-		// Not really relevant on Linux... The applications tend
-		// to be in a different package than the shared objects...
-		static TTValue computedRelativePath()
-		{
-
-		}
-
-		static constexpr TTValue builtinRelativePaths()
-		{
-			return TTValue{"./extensions"};
-		}
-
-		static constexpr TTValue compiledAbsolutePaths()
-		{
-			return compiledAbsolutePaths();
-		}
-
-		static constexpr TTValue builtinAbsolutePaths()
-		{
-			return UnixSpecificInformation::builtinAbsolutePaths();
-		}
-
-
-		static bool loadClassesFromFolder(const char* folderName)
-		{
-
-		}
-};
-
-class WindowsSpecificInformation
-{
-	public:
-		static constexpr TTString extensionPrefix()
-		{ return ""; }
-
-		static constexpr TTString extensionSuffix()
-		{ return ".ttdll"; }
-
-		static TTValue computedRelativePath()
-		{
-			TTString	fullpath{};
-			char		temppath[4096];
-			HKEY		hKey = 0;
-			LONG		lRes;
-			DWORD		dwSize = sizeof(temppath);
-			HRESULT		hr;
-			HINSTANCE	hInstance = GetModuleHandle(NULL);
-
-
-			LPCSTR moduleName = "JamomaFoundation.dll";
-			HMODULE	hmodule = GetModuleHandle(moduleName);
-			// get the path
-			GetModuleFileName(hmodule, (LPSTR)temppath, 4096);
-
-			if (!FAILED(hmodule)) {
-				if (temppath[0]) {
-					fullpath = temppath;
-					// get support folder path
-					fullpath = fullpath.substr(0, fullpath.length() - (strlen(moduleName) + 1));
-					TTFoundationBinaryPath = fullpath;
-					lRes = SHCreateDirectory(NULL, (LPCWSTR)fullpath.c_str());
-				}
-			}
-
-			return fullpath;
-		}
-
-		static constexpr TTValue builtinRelativePaths()
-		{
-			return "./extensions";
-		}
-
-		static constexpr TTValue compiledAbsolutePaths()
-		{
-			return compiledAbsolutePaths();
-		}
-
-		static constexpr TTValue builtinAbsolutePaths()
-		{
-			return {"c:\\Program Files (x86)\Jamoma\extensions"};
-		}
-
-		static bool loadClassesFromFolder(const char* folderName)
-		{
-
-		}
-};
-
-class AndroidSpecificInformation
-{
-	public:
-		static constexpr TTString extensionPrefix()
-		{ return "lib"; }
-
-		static constexpr TTString extensionSuffix()
-		{ return ".so"; }
-
-		static TTValue computedRelativePath()
-		{
-			using namespace std;
-			TTString s{"/proc/"};
-			s.append(getpid());
-			s.append("/cmdline");
-			ifstream input{s.c_str()};
-			string line;
-			getline(input, line);
-			line = string{"/data/data/"} + line + string{"/lib"};
-			return TTValue{TTString{line.c_str()}};
-		}
-
-		static constexpr TTValue builtinRelativePaths()
-		{ return {}; }
-
-		static constexpr TTValue compiledAbsolutePaths()
-		{ return {}; }
-
-		static TTValue builtinAbsolutePaths()
-		{ return {}; }
-
-		static bool loadClassesFromFolder(const char* folderName)
-		{
-
-		}
-};
 
 
 #if defined(TT_PLATFORM_MAC)
+class OSXSpecificInformation
+{
+    public:
+        static TTString extensionPrefix()
+        { return ""; }
+
+        static TTString extensionSuffix()
+        { return ".ttdylib"; }
+
+        static std::string computedRelativePath()
+        {
+            Dl_info		info;
+            char		mainBundleStr[4096];
+
+            // Use the path of JamomaFoundation.dylib; the extensions should be in an
+            // "extensions" subfolder.
+            if (dladdr((const void*)TTFoundationLoadExternalClasses, &info))
+            {
+                char *c = 0;
+
+                std::cout << "Loaded from path: " << info.dli_fname << std::endl;
+
+                strncpy(mainBundleStr, info.dli_fname, 4096);
+                c = strrchr(mainBundleStr, '/');
+                if (c)
+                    *c = 0; // chop the "/JamomaFoundation.dylib off of the path
+            }
+
+            return mainBundleStr;
+        }
+
+        static StringVector builtinRelativePaths()
+        {
+            return {"../Frameworks/jamoma/extensions"};
+        }
+
+        static StringVector compiledAbsolutePaths()
+        {
+            return compiledAbsolutePaths();
+        }
+
+        static StringVector builtinAbsolutePaths()
+        {
+            return UnixSpecificInformation::builtinAbsolutePaths();
+        }
+
+        static bool loadClassesFromFolder(std::string folderName)
+        {
+            return UnixSpecificInformation::loadClassesFromFolder<OSXSpecificInformation>(folderName);
+        }
+};
 using OperatingSystem = OSXSpecificInformation;
 #endif
 // TODO iOS & Static loading.
+
 #if defined(TT_PLATFORM_LINUX) && defined(__ANDROID_API__)
+class AndroidSpecificInformation
+{
+    public:
+        static TTString extensionPrefix()
+        { return "lib"; }
+
+        static TTString extensionSuffix()
+        { return ".so"; }
+
+        static std::string computedRelativePath()
+        {
+            using namespace std;
+            TTString s{"/proc/"};
+            s.append(getpid());
+            s.append("/cmdline");
+            ifstream input{s.c_str()};
+            string line;
+            getline(input, line);
+            line = string{"/data/data/"} + line + string{"/lib"};
+            return {TTString{line.c_str()}};
+        }
+
+        static StringVector builtinRelativePaths()
+        { return {}; }
+
+        static StringVector compiledAbsolutePaths()
+        { return {}; }
+
+        static StringVector builtinAbsolutePaths()
+        { return {}; }
+
+        static bool loadClassesFromFolder(const TTString& folderName)
+        {
+
+        }
+};
 using OperatingSystem = AndroidSpecificInformation;
 #endif
-#if defined(TT_PLATFORM_LINUX)
-using OperatingSystem = LinuxSpecificInformation;
 
+#if defined(TT_PLATFORM_LINUX)
+class LinuxSpecificInformation
+{
+    public:
+        static TTString extensionPrefix()
+        { return ""; }
+
+        static TTString extensionSuffix()
+        { return ".ttso"; }
+
+
+        // Not really relevant on Linux... The applications tend
+        // to be in a different package than the shared objects...
+        static std::string computedRelativePath()
+        {
+
+        }
+
+        static StringVector builtinRelativePaths()
+        {
+            return {"./extensions"};
+        }
+
+        static StringVector compiledAbsolutePaths()
+        {
+            return compiledAbsolutePaths();
+        }
+
+        static StringVector builtinAbsolutePaths()
+        {
+            return UnixSpecificInformation::builtinAbsolutePaths();
+        }
+
+
+        static bool loadClassesFromFolder(const TTString& folderName)
+        {
+
+        }
+};
+
+using OperatingSystem = LinuxSpecificInformation;
 #endif
 #if defined(TT_PLATFORM_WIN)
+class WindowsSpecificInformation
+{
+    public:
+        static TTString extensionPrefix()
+        { return ""; }
+
+        static TTString extensionSuffix()
+        { return ".ttdll"; }
+
+        static std::string computedRelativePath()
+        {
+            TTString	fullpath{};
+            char		temppath[4096];
+            HKEY		hKey = 0;
+            LONG		lRes;
+            DWORD		dwSize = sizeof(temppath);
+            HRESULT		hr;
+            HINSTANCE	hInstance = GetModuleHandle(NULL);
+
+
+            LPCSTR moduleName = "JamomaFoundation.dll";
+            HMODULE	hmodule = GetModuleHandle(moduleName);
+            // get the path
+            GetModuleFileName(hmodule, (LPSTR)temppath, 4096);
+
+            if (!FAILED(hmodule)) {
+                if (temppath[0]) {
+                    fullpath = temppath;
+                    // get support folder path
+                    fullpath = fullpath.substr(0, fullpath.length() - (strlen(moduleName) + 1));
+                    TTFoundationBinaryPath = fullpath;
+                    lRes = SHCreateDirectory(NULL, (LPCWSTR)fullpath.c_str());
+                }
+            }
+
+            return fullpath;
+        }
+
+        static StringVector builtinRelativePaths()
+        {
+            return {"./extensions"};
+        }
+
+        static StringVector compiledAbsolutePaths()
+        {
+            return compiledAbsolutePaths();
+        }
+
+        static StringVector builtinAbsolutePaths()
+        {
+            return {"c:\\Program Files (x86)\\Jamoma\\extensions"};
+        }
+
+        static bool loadClassesFromFolder(const TTString& folderName)
+        {
+
+        }
+};
 using OperatingSystem = WindowsSpecificInformation;
 #endif
 
@@ -737,47 +743,52 @@ class ExternalClassesLoader
 		{
 			if(!TTFoundationBinaryPath.empty())
 			{
-				OS::loadClassesFromFolder(TTFoundationBinaryPath + "/extensions");
+                OS::loadClassesFromFolder(std::string(TTFoundationBinaryPath.c_str()));
 			}
 			else
-			{
-				if(tryLoadClassesFromVector(OS::computedRelativePaths()))
-				{
-					return;
-				}
+            {
+                auto computedPath = OS::computedRelativePath();
+                if(OS::loadClassesFromFolder(computedPath))
+                {
+                    TTFoundationBinaryPath = computedPath;
+                    return;
+                }
+
 				if(tryLoadClassesFromVector(OS::builtinRelativePaths()))
-				{
-					return;
-				}
+                { return; }
 
 				if(tryLoadClassesFromVector(OS::compiledAbsolutePaths()))
-				{
-					return;
-				}
+                { return; }
 
 				if(tryLoadClassesFromVector(OS::builtinAbsolutePaths()))
-				{
-					return;
-				}
+                { return; }
 			}
 		}
 
-		bool tryLoadClassesFromVector(const TTValue& v)
-		{
+        bool tryLoadClassesFromVector(const StringVector& v)
+        {
 			for(auto&& path : v)
 			{
 				if(OS::loadClassesFromFolder(path))
 				{
+                    TTFoundationBinaryPath = path;
 					return true;
 				}
 			}
+            return false;
 		}
 };
 
 void TTFoundationLoadExternalClasses(void)
 {
-	ExtensionLoader<OperatingSystem> os;
-	os.loadClasses();
+    static bool loaded = false;
+    if(!loaded)
+    {
+        ExternalClassesLoader<OperatingSystem> os;
+        os.loadClasses();
+    }
+    else
+        std::cout << "Trying to reload";
 }
 
 
