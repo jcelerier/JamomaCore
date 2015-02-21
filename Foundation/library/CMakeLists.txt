@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 project(Foundation)
 
-set(JAMOMA_ICONV_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libiconv/include" 
-	CACHE 
+set(JAMOMA_ICONV_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libiconv/include"
+	CACHE
 	STRING "libiconv includes" FORCE)
 
 if(UNIX AND NOT APPLE)
@@ -40,6 +40,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/source/TTThread.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/TTUnitTest.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/TTAttribute.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/TTDataObjectBase.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/source/TTExtensionLoader.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/TTBase.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/TTMessage.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/TTObject.cpp
@@ -143,8 +144,8 @@ endif()
 addAppleFramework(Carbon)
 addAppleFramework(CoreServices)
 
-### Output ###
+### Output ###
 setOutput()
 
-### Tests ###
+### Tests ###
 addTestTarget()
