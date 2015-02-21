@@ -19,5 +19,6 @@
 
 TTDataspaceUnit::TTDataspaceUnit(TTValue arguments)
 {
-	name = arguments[0];
+    if(!arguments.empty())
+        name = arguments[0];
 }

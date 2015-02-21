@@ -25,9 +25,12 @@ TTObjectBase(arguments),
 mRunning(NO),
 mSelectedApplication(kTTSymEmpty)
 {
-    mApplicationManager = arguments[0];
-    mActivityInCallback = arguments[1];
-    mActivityOutCallback = arguments[2];
+    if(arguments.size() > 0)
+        mApplicationManager = arguments[0];
+    if(arguments.size() > 1)
+        mActivityInCallback = arguments[1];
+    if(arguments.size() > 2)
+        mActivityOutCallback = arguments[2];
     
 	registerAttribute(TTSymbol("applicationNames"), kTypeLocalValue, NULL, (TTGetterMethod)& Protocol::getApplicationNames);
 

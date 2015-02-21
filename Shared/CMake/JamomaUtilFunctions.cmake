@@ -69,10 +69,12 @@ function(add_jamoma_extension)
 			DESTINATION "${JAMOMA_EXTENSION_FOLDER}")
 
 	# Set extension suffix according to platform conventions
-	if(APPLE)
-		set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
+
+        set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
+        if(APPLE)
 		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".ttdylib")
 	elseif(ANDROID)
+                set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "lib")
 		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".so")
 	elseif(UNIX)
 		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".ttso")
@@ -80,7 +82,7 @@ function(add_jamoma_extension)
 		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".ttdll")
 	endif()
 
-	### Tests ###
+	### Tests ###
 	addTestTarget()
 endfunction()
 
@@ -117,7 +119,7 @@ endFunction()
 #todo do the same for extensions / externals.
 
 
-## Set suffixes according to the conventions of the Jamoma project ##
+## Set suffixes according to the conventions of the Jamoma project ##
 # todo instead make properties sets.
 function(setExtensionSuffix)
 	
@@ -144,7 +146,7 @@ ENDIF (APPLE)
 endFunction(addAppleFramework)
 
 
-## List subdirectories (for extensions) ##
+## List subdirectories (for extensions) ##
 MACRO(SUBDIRLIST result curdir)
   FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
   SET(dirlist "")
@@ -178,7 +180,7 @@ function(addExternals)
 endFunction()
 
 
-## Function to create test targets ##
+## Function to create test targets ##
 function(addTestTarget)
 	if(NOT WIN32)
 		if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/test.cpp)
@@ -207,7 +209,7 @@ function(addTestTarget)
 endFunction()
 
 
-## Function to set install path ##
+## Function to set install path ##
 function(setOutput)
 	if(DEFINED IS_EXTENSION)
 		

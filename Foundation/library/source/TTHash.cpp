@@ -82,7 +82,7 @@ TTErr TTHash::lookup(const TTSymbol key, TTValue& value)
 TTErr TTHash::lookup(const TTPtr key, TTValue& value)
 {
 	lock();
-	TTHashMap* theMap = (TTHashMap*)mHashMap;
+    TTHashMap* theMap = (TTHashMap*)mHashMap;
 	TTHashMapIter iter = theMap->find(TTPtrSizedInt(key));
 
 	//	TTPtrSizedInt a = iter->first;
