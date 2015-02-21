@@ -70,11 +70,11 @@ function(add_jamoma_extension)
 
 	# Set extension suffix according to platform conventions
 
-        set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
-        if(APPLE)
+	set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
+	if(APPLE)
 		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".ttdylib")
 	elseif(ANDROID)
-                set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "lib")
+		set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "lib")
 		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".so")
 	elseif(UNIX)
 		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".ttso")
