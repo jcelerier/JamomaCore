@@ -29,7 +29,7 @@
 //	3. (optional) Number of outlets, default = 1
 
 TT_OBJECT_CONSTRUCTOR,
-mKernel(arguments.size() > 0 ? arguments[0] : "", 1) // first arg is the name of the class, second arg is initialChannelCount
+mKernel(arguments[0], 1) // first arg is the name of the class, second arg is initialChannelCount
 {
 	TT_ASSERT(graph_correct_instantiation_args, (arguments.size() > 0));
 	

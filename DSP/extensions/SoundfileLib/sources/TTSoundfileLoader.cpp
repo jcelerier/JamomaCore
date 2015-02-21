@@ -64,33 +64,15 @@ TTErr TTSoundfileLoader::setTargetMatrix(const TTMatrix newTargetMatrix)
     mTargetMatrix = (TTSampleMatrixPtr)newTargetMatrix.instance();
     mTargetMatrixLengthInSamples = newTargetMatrix.getRowCount();
     mTargetMatrixNumChannels = newTargetMatrix.getColumnCount();
-    TTValue out;
-    newTargetMatrix.get("SampleRate", out);
-    mTargetMatrixSampleRate = out[0];
+    newTargetMatrix.get("sampleRate", mTargetMatrixSampleRate);
     
-    return err;
-}
-
-// target a new TTSampleMatrix
-TTErr TTSoundfileLoader::setTargetMatrix(const TTSampleMatrixPtr& newTargetMatrix)
-{
-    TTErr err = kTTErrNone;
-
-    mTargetMatrix = newTargetMatrix;
-    mTargetMatrixLengthInSamples = newTargetMatrix->getRowCount();
-    mTargetMatrixNumChannels = newTargetMatrix->getColumnCount();
-
-    TTValue out;
-    newTargetMatrix->get("SampleRate", out);
-    mTargetMatrixSampleRate = out[0];
-
     return err;
 }
 
 // target a new TTObjectBase if it proves to be a TTSampleMatrix
 TTErr TTSoundfileLoader::setTargetMatrix(const TTObjectBase* newTargetObjectPtr)
 {
-    TTSampleMatrixPtr newTargetMatrix = nullptr;
+    TTSampleMatrixPtr newTargetMatrix = NULL;
     
     if (newTargetObjectPtr->getName() != TT("samplematrix"))
     {

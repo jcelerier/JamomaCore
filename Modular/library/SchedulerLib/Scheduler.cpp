@@ -34,11 +34,8 @@ mDate(0.),
 mCallback(NULL),
 mBaton(NULL)
 {
-    if(arguments.size() > 0)
-        mCallback = SchedulerPositionCallback((TTPtr)arguments[0]);
-
-    if(arguments.size() > 1)
-        mBaton = arguments[1];
+    mCallback = SchedulerPositionCallback((TTPtr)arguments[0]);
+    mBaton = arguments[1];
 	
 	addAttribute(Name, kTypeSymbol);
 	addAttributeProperty(Name, readOnly, YES);
