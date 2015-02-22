@@ -144,8 +144,5 @@ endif()
 addAppleFramework(Carbon)
 addAppleFramework(CoreServices)
 
-### Output ###
-setOutput()
-
 ### Tests ###
 addTestTarget()

@@ -172,16 +172,16 @@ class UnixSpecificInformation
 			char		mainBundleStr[4096];
 
 			// Use the path of JamomaFoundation
-			if (dladdr((const void*)TTFoundationInit, &info))
+            if (dladdr((const void*)TTLoadExtensions, &info))
 			{
 				char *c = 0;
 
-				TTLogMessage("computedRelativePath(): %s\n", info.dli_fname);
+                TTLogMessage("computedRelativePath(): %s\n", info.dli_fname);
 
 				strncpy(mainBundleStr, info.dli_fname, 4096);
 				c = strrchr(mainBundleStr, '/');
 				if (c)
-					*c = 0; // chop the "/JamomaFoundation.dylib/so off of the path
+                    *c = 0; // chop the "/JamomaFoundation.dylib/so off of the path
 			}
 
 			return mainBundleStr;
@@ -222,7 +222,10 @@ class OSXSpecificInformation
 
 		static bool loadClassesFromFolder(const std::string& folderName)
 		{
-			return UnixSpecificInformation::loadClassesFromFolder<OSXSpecificInformation>(folderName);
+            bool res = UnixSpecificInformation::loadClassesFromFolder<OSXSpecificInformation>(folderName);
+            if(res)
+                TTFoundationBinaryPath = folderName.c_str();
+            return res;
 		}
 };
 using OperatingSystem = OSXSpecificInformation;
@@ -415,8 +418,7 @@ bool loadClassesFromPaths(StringVector&& v)
 	{
 		if(OS::loadClassesFromFolder(path))
 		{
-			TTFoundationBinaryPath = path;
-			return true;
+            return true;
 		}
 	}
 
@@ -442,7 +444,7 @@ bool loadClassesFromBuiltinPaths()
 template<typename OS>
 bool loadClassesFromComputedPaths()
 {
-	auto computedPath = OperatingSystem::computedRelativePath();
+    auto computedPath = OperatingSystem::computedRelativePath();
 	return (!computedPath.empty()
 			&& OperatingSystem::loadClassesFromFolder(computedPath));
 }
@@ -457,20 +459,21 @@ bool loadClassesFromComputedPaths()
 void TTLoadExtensions(const char* pathToBinaries, bool loadFromOtherPaths)
 {
 	if(!pathToBinaries)
-	{
-		if(loadFromOtherPaths && !loadClassesFromComputedPaths<OperatingSystem>())
-		{
-			loadClassesFromBuiltinPaths<OperatingSystem>();
+    {
+        auto res = loadClassesFromComputedPaths<OperatingSystem>();
+        if(loadFromOtherPaths && !res)
+        {
+            loadClassesFromBuiltinPaths<OperatingSystem>();
 		}
 	}
 	else
-	{
+    {
 		if(loadFromOtherPaths && !OperatingSystem::loadClassesFromFolder(pathToBinaries))
-		{
+        {
 			if(!loadClassesFromComputedPaths<OperatingSystem>())
-			{
-				loadClassesFromBuiltinPaths<OperatingSystem>();
+            {
+                loadClassesFromBuiltinPaths<OperatingSystem>();
 			}
 		}
-	}
+    }
 }

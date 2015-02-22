@@ -26,8 +26,5 @@ target_link_libraries(${PROJECT_NAME} Graph)
 
 addAppleFramework(Carbon)
 
-### Output ###
-setOutput()
-
 ### Tests ###
 addTestTarget()

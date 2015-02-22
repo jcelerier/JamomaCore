@@ -79,8 +79,5 @@ target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})
 
 addAppleFramework(Carbon)
 
-### Output ###
-setOutput()
-
 ### Tests ###
 addTestTarget()

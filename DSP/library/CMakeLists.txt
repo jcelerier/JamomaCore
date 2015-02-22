@@ -30,8 +30,5 @@ addJamomaLibrary()
 
 target_link_libraries(${PROJECT_NAME} Foundation)
 
-### Output ###
-setOutput()
-
 ### Tests ###
 addTestTarget()

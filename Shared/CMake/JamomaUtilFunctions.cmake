@@ -1,10 +1,15 @@
 cmake_minimum_required(VERSION 3.0)
 
-
+### Core libraries ### 
 function(setupJamomaLibraryProperties LIBNAME)
+	# Filename
 	set_property(TARGET ${LIBNAME}
 				 PROPERTY OUTPUT_NAME Jamoma${LIBNAME})
+	set_property(TARGET ${PROJECT_NAME}
+				 PROPERTY INSTALL_RPATH "@loader_path/../../../../support;@loader_path")
+	
 
+	# Version
 	set_property(TARGET ${LIBNAME}
 				 PROPERTY VERSION ${Jamoma_VERSION})
 	set_property(TARGET ${LIBNAME}
@@ -29,11 +34,12 @@ function(setupJamomaLibraryProperties LIBNAME)
 			EXPORT ${LIBNAME}Targets
 			LIBRARY DESTINATION lib
 			ARCHIVE DESTINATION lib
-			RUNTIME DESTINATION bin)
+			RUNTIME DESTINATION bin
+			COMPONENT Devel)
 
 	# TODO make a single variable for the include folder.
 	if(APPLE)
-		install(FILES ${PROJECT_HDRS} DESTINATION "include")
+		install(FILES ${PROJECT_HDRS} DESTINATION "include" COMPONENT Devel)
 	else()
 		install(FILES ${PROJECT_HDRS} DESTINATION "include/jamoma" COMPONENT Devel)
 	endif()
@@ -45,46 +51,10 @@ function(setupJamomaLibraryProperties LIBNAME)
 	install(EXPORT ${LIBNAME}Targets
 			FILE Jamoma${LIBNAME}Targets.cmake
 			NAMESPACE Jamoma::
-			DESTINATION ${ConfigPackageLocation})
+			DESTINATION ${ConfigPackageLocation}
+			COMPONENT Devel)
 endFunction()
 
-
-function(add_jamoma_extension)
-	# TODO : static extensions
-	add_library(${PROJECT_NAME}
-				SHARED
-				${PROJECT_SRCS} ${PROJECT_HDRS})
-
-	target_link_libraries(${PROJECT_NAME} ${JAMOMA_CURRENT_LIBRARY_NAME})
-
-	# Install the extension
-	if(APPLE)
-		set(JAMOMA_EXTENSION_FOLDER "extensions")
-	else()
-		set(JAMOMA_EXTENSION_FOLDER "lib/jamoma")
-	endif()
-
-	install(TARGETS ${PROJECT_NAME}
-			EXPORT ${JAMOMA_CURRENT_LIBRARY_NAME}Targets
-			DESTINATION "${JAMOMA_EXTENSION_FOLDER}")
-
-	# Set extension suffix according to platform conventions
-
-	set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
-	if(APPLE)
-		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".ttdylib")
-	elseif(ANDROID)
-		set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "lib")
-		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".so")
-	elseif(UNIX)
-		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".ttso")
-	elseif(WIN32)
-		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".ttdll")
-	endif()
-
-	### Tests ###
-	addTestTarget()
-endfunction()
 
 function(addJamomaLibrary)
 	# Dynamic
@@ -114,25 +84,65 @@ function(addJamomaLibrary)
 		setupJamomaLibraryProperties(${PROJECT_NAME}-x86_64-static)
 	endif()
 
+	if(BUILD_JAMOMAMAX)
+		install(TARGETS ${PROJECT_NAME}
+				DESTINATION "${JAMOMAMAX_INSTALL_FOLDER}/Jamoma/support"
+				COMPONENT JamomaMax)
+	endif()
 endFunction()
 
-#todo do the same for extensions / externals.
 
 
-## Set suffixes according to the conventions of the Jamoma project ##
-# todo instead make properties sets.
-function(setExtensionSuffix)
-	
-endFunction(setExtensionSuffix)
+### Extensions ###
+function(add_jamoma_extension)
+	# TODO : static extensions
+	add_library(${PROJECT_NAME}
+				SHARED
+				${PROJECT_SRCS} ${PROJECT_HDRS})
 
-function(setExternalSuffix)
+	target_link_libraries(${PROJECT_NAME} ${JAMOMA_CURRENT_LIBRARY_NAME})
+
+	# Rpath
+	set_property(TARGET ${PROJECT_NAME}
+				 PROPERTY INSTALL_RPATH "@loader_path")
+
+	# Install the extension
 	if(APPLE)
-		set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
-		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX "")
-	elseif(WIN32)
-		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".mxe")
+		set(JAMOMA_EXTENSION_FOLDER "extensions")
+	else()
+		set(JAMOMA_EXTENSION_FOLDER "lib/jamoma")
 	endif()
-endFunction(setExternalSuffix)
+
+	# TODO 1 component per extension ? Maybe overkill...
+	install(TARGETS ${PROJECT_NAME}
+			EXPORT ${JAMOMA_CURRENT_LIBRARY_NAME}Targets
+			DESTINATION "${JAMOMA_EXTENSION_FOLDER}"
+			COMPONENT Extensions)
+
+	# Set extension suffix according to platform conventions
+
+	set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
+	if(APPLE)
+		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".ttdylib")
+	elseif(ANDROID)
+		set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "lib")
+		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".so")
+	elseif(UNIX)
+		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".ttso")
+	elseif(WIN32)
+		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".ttdll")
+	endif()
+
+	### Tests ###
+	addTestTarget()
+
+	if(BUILD_JAMOMAMAX)
+		install(TARGETS ${PROJECT_NAME}
+				DESTINATION "${JAMOMAMAX_INSTALL_FOLDER}/Jamoma/support"
+				COMPONENT JamomaMax)
+	endif()
+endfunction()
+
 
 
 ## Add Apple frameworks ##
@@ -208,19 +218,6 @@ function(addTestTarget)
 	endif()
 endFunction()
 
-
-## Function to set install path ##
-function(setOutput)
-	if(DEFINED IS_EXTENSION)
-		
-	elseif(DEFINED IS_EXTERNAL)
-		setExternalSuffix()
-		INSTALL(TARGETS ${PROJECT_NAME} 
-				DESTINATION "externals")
-	endif()
-endFunction()
-
-
 ## Function to add the Max/MSP includes ##
 # TODO put this in a module file instead.
 function(addMaxsupport)
@@ -283,10 +280,12 @@ if(NOT WIN32)
 
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${C74_SYM_LINKER_FLAGS}" PARENT_SCOPE)
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${C74_SYM_LINKER_FLAGS}" PARENT_SCOPE)
+	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${C74_SYM_LINKER_FLAGS}" PARENT_SCOPE)
 endif() # Todo : find something equivalent for windows
 endFunction()
 
-# This function checks the architectures of a library on OS X
+
+# This function checks the architectures of a given library on OS X
 function(osx_check_architecture LIBNAME LIBFILE)
 	if(APPLE)
 		if("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
