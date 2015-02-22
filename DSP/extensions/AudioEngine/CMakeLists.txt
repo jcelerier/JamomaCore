@@ -25,9 +25,14 @@ include_directories(${PORTAUDIO_INCLUDE_DIR})
 file(GLOB_RECURSE PROJECT_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/includes/*.h)
 add_jamoma_extension()
 
-target_link_libraries(${PROJECT_NAME} ${PORTAUDIO_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}
+					  debug ${PORTAUDIO_LIBRARIES_DEBUG}
+					  optimized ${PORTAUDIO_LIBRARIES_RELEASE})
 
-addAppleFramework(Carbon)
-addAppleFramework(CoreAudio)
-addAppleFramework(AudioUnit)
-addAppleFramework(AudioToolbox)
+if(APPLE)
+	addAppleFramework(Carbon)
+	addAppleFramework(CoreAudio)
+	addAppleFramework(AudioUnit)
+	addAppleFramework(AudioToolbox)
+	target_link_libraries(${PROJECT_NAME} ${OSX_FRAMEWORKS})
+endif()

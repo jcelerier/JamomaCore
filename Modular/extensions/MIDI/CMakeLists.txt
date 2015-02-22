@@ -18,7 +18,7 @@ if(NOT PORTMIDI_FOUND)
 endif()
 
 set(PROJECT_SRCS
-${CMAKE_CURRENT_SOURCE_DIR}/../../library/ProtocolLib/Protocol.cpp		
+$<TARGET_OBJECTS:ProtocolLib>
 ${CMAKE_CURRENT_SOURCE_DIR}/source/MIDI.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/MIDIDestination.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/MIDIInput.cpp
@@ -30,23 +30,25 @@ ${CMAKE_CURRENT_SOURCE_DIR}/source/MIDISource.cpp
 
 include_directories("${PROJECT_SOURCE_DIR}/")
 include_directories("${PROJECT_SOURCE_DIR}/includes")
-include_directories("${PROJECT_SOURCE_DIR}/../../library/ProtocolLib")
-include_directories("${PORTMIDI_INCLUDE_DIR}")
+include_directories($<TARGET_PROPERTY:ProtocolLib,INTERFACE_INCLUDE_DIRECTORIES>)
+include_directories("${PORTMIDI_INCLUDE_DIRS}")
 
 file(GLOB_RECURSE PROJECT_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/includes/*.h)
 add_jamoma_extension()
 
-target_link_libraries(${PROJECT_NAME} ${PORTMIDI_LIBRARIES})
+
+target_link_libraries(${PROJECT_NAME}
+					  debug ${PORTMIDI_LIBRARIES_DEBUG}
+					  optimized ${PORTMIDI_LIBRARIES_DEBUG})
+
+if(APPLE)
+	addAppleFramework(CoreMIDI)
+	addAppleFramework(CoreFoundation)
+	addAppleFramework(CoreAudio)
+	addAppleFramework(Carbon)
+	target_link_libraries(${PROJECT_NAME} ${OSX_FRAMEWORKS})
+endif()
 
 if(WIN32)
 	target_link_libraries(${PROJECT_NAME} winmm)
-endif()
-
-addAppleFramework(CoreMIDI)
-addAppleFramework(CoreFoundation)
-addAppleFramework(CoreAudio)
-addAppleFramework(Carbon)
-
-if(APPLE)
-	target_link_libraries(${PROJECT_NAME} ${OSX_FRAMEWORKS})
 endif()

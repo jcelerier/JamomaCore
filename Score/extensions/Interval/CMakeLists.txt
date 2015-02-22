@@ -18,9 +18,9 @@ include_directories("${PROJECT_SOURCE_DIR}/..")
 include_directories("${PROJECT_SOURCE_DIR}/includes")
 include_directories("${PROJECT_SOURCE_DIR}/../../library/tests")
 
-include_directories("${JAMOMA_MODULAR_PROTOCOLLIB_INCLUDE_DIR}")
-include_directories("${JAMOMA_MODULAR_SCHEDULERLIB_INCLUDE_DIR}")
-include_directories("${JAMOMA_MODULAR_PEEROBJECT_INCLUDE_DIR}")
+include_directories($<TARGET_PROPERTY:ProtocolLib,INTERFACE_INCLUDE_DIRECTORIES>)
+include_directories($<TARGET_PROPERTY:SchedulerLib,INTERFACE_INCLUDE_DIRECTORIES>)
+include_directories($<TARGET_PROPERTY:PeerObject,INTERFACE_INCLUDE_DIRECTORIES>)
 
 include_directories("${JAMOMA_ICONV_INCLUDE_DIR}")
 

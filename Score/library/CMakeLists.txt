@@ -23,9 +23,9 @@ file(GLOB_RECURSE PROJECT_HDRS
 	${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h
 )
 
-include_directories("${JAMOMA_MODULAR_PROTOCOLLIB_INCLUDE_DIR}")
-include_directories("${JAMOMA_MODULAR_SCHEDULERLIB_INCLUDE_DIR}")
-include_directories("${JAMOMA_MODULAR_PEEROBJECT_INCLUDE_DIR}")
+include_directories($<TARGET_PROPERTY:ProtocolLib,INTERFACE_INCLUDE_DIRECTORIES>)
+include_directories($<TARGET_PROPERTY:SchedulerLib,INTERFACE_INCLUDE_DIRECTORIES>)
+include_directories($<TARGET_PROPERTY:PeerObject,INTERFACE_INCLUDE_DIRECTORIES>)
 include_directories("${JAMOMA_ICONV_INCLUDE_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/tests")
 include_directories("${PROJECT_SOURCE_DIR}/includes")
@@ -44,5 +44,5 @@ target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})
 
 addAppleFramework(Carbon)
 
-### Tests ###
+### Tests ###
 addTestTarget()
