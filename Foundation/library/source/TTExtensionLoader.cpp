@@ -6,17 +6,6 @@
 
 using StringVector = std::vector<std::string>;
 
-// Paths that can be set by packagers.
-StringVector compiledAbsolutePaths()
-{
-	return {
-#if defined(JAMOMA_EXTENSIONS_INSTALL_PREFIX)
-		JAMOMA_EXTENSIONS_INSTALL_PREFIX,
-#endif
-	};
-}
-
-
 // Utility compile-time functions to work with string constants.
 template <typename T, std::size_t n>
 constexpr size_t array_length(const T (&)[n])
@@ -47,9 +36,9 @@ bool isExtensionFilename(const std::string& filename)
 		if(filename.length() >= string_length(OS::extensionSuffix))
 		{
 			return (0 == filename.compare(
-							filename.length() - string_length(OS::extensionSuffix),
-							string_length(OS::extensionSuffix),
-							OS::extensionSuffix));
+						filename.length() - string_length(OS::extensionSuffix),
+						string_length(OS::extensionSuffix),
+						OS::extensionSuffix));
 		}
 	}
 
@@ -105,6 +94,9 @@ class UnixSpecificInformation
 		static StringVector builtinAbsolutePaths()
 		{
 			return {
+#if defined(JAMOMA_EXTENSIONS_INSTALL_PREFIX)
+				JAMOMA_EXTENSIONS_INSTALL_PREFIX,
+#endif
 				"/usr/lib/jamoma",
 				"/usr/local/lib/jamoma",
 				"/usr/jamoma/lib",
@@ -172,16 +164,16 @@ class UnixSpecificInformation
 			char		mainBundleStr[4096];
 
 			// Use the path of JamomaFoundation
-            if (dladdr((const void*)TTLoadExtensions, &info))
+			if (dladdr((const void*)TTLoadExtensions, &info))
 			{
 				char *c = 0;
 
-                TTLogMessage("computedRelativePath(): %s\n", info.dli_fname);
+				TTLogMessage("computedRelativePath(): %s\n", info.dli_fname);
 
 				strncpy(mainBundleStr, info.dli_fname, 4096);
 				c = strrchr(mainBundleStr, '/');
 				if (c)
-                    *c = 0; // chop the "/JamomaFoundation.dylib/so off of the path
+					*c = 0; // chop the "/JamomaFoundation.dylib/so off of the path
 			}
 
 			return mainBundleStr;
@@ -210,11 +202,6 @@ class OSXSpecificInformation
 			return {"../Frameworks/jamoma/extensions"};
 		}
 
-		static StringVector compiledAbsolutePaths()
-		{
-			return ::compiledAbsolutePaths();
-		}
-
 		static StringVector builtinAbsolutePaths()
 		{
 			return UnixSpecificInformation::builtinAbsolutePaths();
@@ -222,10 +209,10 @@ class OSXSpecificInformation
 
 		static bool loadClassesFromFolder(const std::string& folderName)
 		{
-            bool res = UnixSpecificInformation::loadClassesFromFolder<OSXSpecificInformation>(folderName);
-            if(res)
-                TTFoundationBinaryPath = folderName.c_str();
-            return res;
+			bool res = UnixSpecificInformation::loadClassesFromFolder<OSXSpecificInformation>(folderName);
+			if(res)
+				TTFoundationBinaryPath = folderName.c_str();
+			return res;
 		}
 };
 using OperatingSystem = OSXSpecificInformation;
@@ -260,9 +247,6 @@ class AndroidSpecificInformation
 		static StringVector builtinRelativePaths()
 		{ return {}; }
 
-		static StringVector compiledAbsolutePaths()
-		{ return {}; }
-
 		static StringVector builtinAbsolutePaths()
 		{ return {}; }
 
@@ -290,11 +274,6 @@ class LinuxSpecificInformation
 		static StringVector builtinRelativePaths()
 		{
 			return {"./extensions"};
-		}
-
-		static StringVector compiledAbsolutePaths()
-		{
-			return ::compiledAbsolutePaths();
 		}
 
 		static StringVector builtinAbsolutePaths()
@@ -354,14 +333,14 @@ class WindowsSpecificInformation
 			return {"./extensions"};
 		}
 
-		static StringVector compiledAbsolutePaths()
-		{
-			return ::compiledAbsolutePaths();
-		}
-
 		static StringVector builtinAbsolutePaths()
 		{
-			return {"c:\\Program Files (x86)\\Jamoma\\extensions"};
+			return {
+#if defined(JAMOMA_EXTENSIONS_INSTALL_PREFIX)
+				JAMOMA_EXTENSIONS_INSTALL_PREFIX,
+#endif
+				"c:\\Program Files (x86)\\Jamoma\\extensions"
+			};
 		}
 
 		static bool loadClassesFromFolder(const std::string& folderName)
@@ -418,7 +397,7 @@ bool loadClassesFromPaths(StringVector&& v)
 	{
 		if(OS::loadClassesFromFolder(path))
 		{
-            return true;
+			return true;
 		}
 	}
 
@@ -431,9 +410,6 @@ bool loadClassesFromBuiltinPaths()
 	if(loadClassesFromPaths<OS>(OS::builtinRelativePaths()))
 		return true;
 
-	if(loadClassesFromPaths<OS>(OS::compiledAbsolutePaths()))
-		return true;
-
 	if(loadClassesFromPaths<OS>(OS::builtinAbsolutePaths()))
 		return true;
 
@@ -444,7 +420,7 @@ bool loadClassesFromBuiltinPaths()
 template<typename OS>
 bool loadClassesFromComputedPaths()
 {
-    auto computedPath = OperatingSystem::computedRelativePath();
+	auto computedPath = OperatingSystem::computedRelativePath();
 	return (!computedPath.empty()
 			&& OperatingSystem::loadClassesFromFolder(computedPath));
 }
@@ -459,21 +435,22 @@ bool loadClassesFromComputedPaths()
 void TTLoadExtensions(const char* pathToBinaries, bool loadFromOtherPaths)
 {
 	if(!pathToBinaries)
-    {
-        auto res = loadClassesFromComputedPaths<OperatingSystem>();
-        if(loadFromOtherPaths && !res)
-        {
-            loadClassesFromBuiltinPaths<OperatingSystem>();
+	{
+		auto res = loadClassesFromComputedPaths<OperatingSystem>();
+		if(loadFromOtherPaths && !res)
+		{
+			loadClassesFromBuiltinPaths<OperatingSystem>();
 		}
 	}
 	else
-    {
-		if(loadFromOtherPaths && !OperatingSystem::loadClassesFromFolder(pathToBinaries))
-        {
+	{
+		auto res = OperatingSystem::loadClassesFromFolder(pathToBinaries);
+		if(loadFromOtherPaths && !res)
+		{
 			if(!loadClassesFromComputedPaths<OperatingSystem>())
-            {
-                loadClassesFromBuiltinPaths<OperatingSystem>();
+			{
+				loadClassesFromBuiltinPaths<OperatingSystem>();
 			}
 		}
-    }
+	}
 }
