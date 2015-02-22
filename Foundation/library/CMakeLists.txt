@@ -115,8 +115,7 @@ include_directories("${PROJECT_SOURCE_DIR}/includes")
 include_directories("${PROJECT_SOURCE_DIR}/tests")
 include_directories("${PROJECT_SOURCE_DIR}/Mersenne-1.1")
 
-
-addJamomaLibrary()
+add_jamoma_library()
 
 if(WIN32)
 	if(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -136,9 +135,6 @@ if(NOT ANDROID AND NOT WIN32)
 	target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 	target_link_libraries(${PROJECT_NAME} ${DL_LIBRARY})
 endif()
-# OS X :
-addAppleFramework(Carbon)
-addAppleFramework(CoreServices)
 
 ### Tests ###
 addTestTarget()

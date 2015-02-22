@@ -20,7 +20,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/TTAudioEngine.cpp
 )
 
 include_directories("${PROJECT_SOURCE_DIR}/includes")
-include_directories(${PORTAUDIO_INCLUDE_DIR})
+include_directories("${PORTAUDIO_INCLUDE_DIRS}")
 
 file(GLOB_RECURSE PROJECT_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/includes/*.h)
 add_jamoma_extension()
@@ -29,10 +29,5 @@ target_link_libraries(${PROJECT_NAME}
 					  debug ${PORTAUDIO_LIBRARIES_DEBUG}
 					  optimized ${PORTAUDIO_LIBRARIES_RELEASE})
 
-if(APPLE)
-	addAppleFramework(Carbon)
-	addAppleFramework(CoreAudio)
-	addAppleFramework(AudioUnit)
-	addAppleFramework(AudioToolbox)
-	target_link_libraries(${PROJECT_NAME} ${OSX_FRAMEWORKS})
-endif()
+target_link_frameworks(TARGET ${PROJECT_NAME}
+					   FRAMEWORKS Carbon CoreAudio AudioUnit AudioToolbox)

@@ -56,7 +56,7 @@ function(setupJamomaLibraryProperties LIBNAME)
 endFunction()
 
 
-function(addJamomaLibrary)
+function(add_jamoma_library)
 	# Dynamic
 	add_library(${PROJECT_NAME}
 				SHARED
@@ -120,7 +120,6 @@ function(add_jamoma_extension)
 			COMPONENT Extensions)
 
 	# Set extension suffix according to platform conventions
-
 	set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 	if(APPLE)
 		set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".ttdylib")
@@ -146,15 +145,21 @@ endfunction()
 
 
 ## Add Apple frameworks ##
-function(addAppleFramework FRAMEWORK_NAME)
-IF(APPLE)
-   UNSET(THE_LIBRARY CACHE)
-   FIND_LIBRARY(THE_LIBRARY ${FRAMEWORK_NAME})
-   MARK_AS_ADVANCED (THE_LIBRARY)
-   SET(OSX_FRAMEWORKS "${OSX_FRAMEWORKS};${THE_LIBRARY}" PARENT_SCOPE)
-ENDIF (APPLE)
-endFunction(addAppleFramework)
 
+function(target_link_frameworks)
+	set(oneValueArgs TARGET)
+	set(multiValueArgs FRAMEWORKS)
+	cmake_parse_arguments(target_link_frameworks "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+	if(APPLE)
+	foreach(THE_FRAMEWORK ${target_link_frameworks_FRAMEWORKS})
+		unset(THE_LIBRARY CACHE)
+		find_library(THE_LIBRARY ${THE_FRAMEWORK})
+		target_link_libraries(${target_link_frameworks_TARGET} ${THE_LIBRARY})
+		message("Linking ${target_link_frameworks_TARGET} with ${THE_LIBRARY}")
+	endforeach()
+	endif()
+endFunction()
 
 ## List subdirectories (for extensions) ##
 MACRO(SUBDIRLIST result curdir)

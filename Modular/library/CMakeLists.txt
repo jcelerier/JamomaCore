@@ -81,13 +81,11 @@ $<TARGET_PROPERTY:ProtocolLib,INTERFACE_INCLUDE_DIRECTORIES>
 $<TARGET_PROPERTY:SchedulerLib,INTERFACE_INCLUDE_DIRECTORIES>
 $<TARGET_PROPERTY:PeerObject,INTERFACE_INCLUDE_DIRECTORIES>)
 
-addJamomaLibrary()
+add_jamoma_library()
 
 target_link_libraries(${PROJECT_NAME} Foundation)
 target_link_libraries(${PROJECT_NAME} DSP)
 target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})
-
-addAppleFramework(Carbon)
 
 ### Tests ###
 addTestTarget()

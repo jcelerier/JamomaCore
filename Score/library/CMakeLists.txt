@@ -33,14 +33,12 @@ if(ANDROID)
 include_directories("${CMAKE_FIND_ROOT_PATH}/include")
 endif()
 
-addJamomaLibrary()
+add_jamoma_library()
 
 target_link_libraries(${PROJECT_NAME} Foundation)
 target_link_libraries(${PROJECT_NAME} DSP)
 target_link_libraries(${PROJECT_NAME} Modular)
 target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})
-
-addAppleFramework(Carbon)
 
 ### Tests ###
 addTestTarget()

@@ -31,11 +31,7 @@ target_link_libraries(${PROJECT_NAME}
 					  debug ${PORTMIDI_LIBRARIES_DEBUG}
 					  optimized ${PORTMIDI_LIBRARIES_DEBUG})
 
-if(APPLE)
-	addAppleFramework(CoreMIDI)
-	addAppleFramework(CoreFoundation)
-	addAppleFramework(CoreAudio)
-	addAppleFramework(Carbon)
-	target_link_libraries(${PROJECT_NAME} ${OSX_FRAMEWORKS})
-endif()
+target_link_frameworks(TARGET ${PROJECT_NAME}
+					   FRAMEWORKS Carbon CoreAudio CoreMIDI CoreFoundation)
+
 
