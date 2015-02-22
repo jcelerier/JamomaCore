@@ -37,8 +37,8 @@ set(LIBXML2_DEFINITIONS ${PC_LIBXML_CFLAGS_OTHER})
 
 find_path(LIBXML2_INCLUDE_DIR NAMES libxml/xpath.h
    PATHS 
-   "C://Program Files (x86)//libxml2*//include" 
-   "Foundation//library//libxml2//win32//include" 
+   "Foundation//library//libxml2//win32//include"
+   "C://Program Files (x86)//libxml2*//include"
    "include"
    HINTS
    ${PC_LIBXML_INCLUDEDIR}
@@ -46,9 +46,10 @@ find_path(LIBXML2_INCLUDE_DIR NAMES libxml/xpath.h
    PATH_SUFFIXES libxml2
    )
 
-find_library(LIBXML2_LIBRARIES NAMES xml2 libxml2
+find_library(LIBXML2_LIBRARIES NAMES libxml2_a xml2_a xml2 libxml2
    HINTS
    PATHS 
+   "Foundation//library//libxml2//win32//lib"
    "C://Program Files (x86)//libxml2*//lib"
    "arm-linux-androideabi/local/lib"
    ${PC_LIBXML_LIBDIR}

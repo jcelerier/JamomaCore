@@ -20,8 +20,6 @@ include_directories("${PROJECT_SOURCE_DIR}/../../library/tests")
 
 include_directories($<TARGET_PROPERTY:TimePluginLib,INTERFACE_INCLUDE_DIRECTORIES>)
 
-include_directories("${JAMOMA_ICONV_INCLUDE_DIR}")
-
 include_directories(${LIBXML2_INCLUDE_DIR})
 if(ANDROID)
 include_directories("${CMAKE_FIND_ROOT_PATH}/include")

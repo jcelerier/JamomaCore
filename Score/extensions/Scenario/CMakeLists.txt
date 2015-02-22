@@ -24,9 +24,6 @@ include_directories("${PROJECT_SOURCE_DIR}/../../library/tests")
 
 include_directories($<TARGET_PROPERTY:TimePluginLib,INTERFACE_INCLUDE_DIRECTORIES>)
 
-include_directories("${JAMOMA_ICONV_INCLUDE_DIR}")
-
-
 # TODO make FindPthreadWin32.cmake
 if(WIN32)
 	SET(PTHREAD_WIN32_PATH "C:\\Program Files (x86)\\pthread-win32" )

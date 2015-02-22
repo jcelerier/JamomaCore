@@ -6,7 +6,7 @@ add_definitions(-DTTSCORE_EXPORTS)
 find_package(LibXml2 REQUIRED)
 
 set(PROJECT_SRCS
-${CMAKE_CURRENT_SOURCE_DIR}/../extensions/TimePluginLib.cpp
+$<TARGET_OBJECTS:TimePluginLib>
 ${CMAKE_CURRENT_SOURCE_DIR}/source/TTScore.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/TTCurve.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/Expression.cpp
@@ -23,10 +23,8 @@ file(GLOB_RECURSE PROJECT_HDRS
 	${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h
 )
 
-include_directories($<TARGET_PROPERTY:ProtocolLib,INTERFACE_INCLUDE_DIRECTORIES>)
-include_directories($<TARGET_PROPERTY:SchedulerLib,INTERFACE_INCLUDE_DIRECTORIES>)
-include_directories($<TARGET_PROPERTY:PeerObject,INTERFACE_INCLUDE_DIRECTORIES>)
-include_directories("${JAMOMA_ICONV_INCLUDE_DIR}")
+include_directories($<TARGET_PROPERTY:TimePluginLib,INTERFACE_INCLUDE_DIRECTORIES>)
+
 include_directories("${PROJECT_SOURCE_DIR}/tests")
 include_directories("${PROJECT_SOURCE_DIR}/includes")
 include_directories(${LIBXML2_INCLUDE_DIR})
