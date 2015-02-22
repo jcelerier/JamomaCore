@@ -9,11 +9,12 @@ endif()
 
 set(PROJECT_SRCS
 ${CMAKE_CURRENT_SOURCE_DIR}/source/Scenario.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/../TimePluginLib.cpp
+$<TARGET_OBJECTS:TimePluginLib>
 )
 
 file(GLOB_RECURSE PROJECT_HDRS
     ${CMAKE_CURRENT_SOURCE_DIR}/includes/*.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../extensions/TimePluginLib.h
 )
 
 include_directories("${PROJECT_SOURCE_DIR}/")
@@ -21,12 +22,9 @@ include_directories("${PROJECT_SOURCE_DIR}/..")
 include_directories("${PROJECT_SOURCE_DIR}/includes")
 include_directories("${PROJECT_SOURCE_DIR}/../../library/tests")
 
-include_directories($<TARGET_PROPERTY:ProtocolLib,INTERFACE_INCLUDE_DIRECTORIES>)
-include_directories($<TARGET_PROPERTY:SchedulerLib,INTERFACE_INCLUDE_DIRECTORIES>)
-include_directories($<TARGET_PROPERTY:PeerObject,INTERFACE_INCLUDE_DIRECTORIES>)
+include_directories($<TARGET_PROPERTY:TimePluginLib,INTERFACE_INCLUDE_DIRECTORIES>)
 
 include_directories("${JAMOMA_ICONV_INCLUDE_DIR}")
-
 
 
 # TODO make FindPthreadWin32.cmake

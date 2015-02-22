@@ -18,7 +18,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/source/TTTimeProcess.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/tests/TTScore.test.cpp
 )
 file(GLOB_RECURSE PROJECT_HDRS
-	${CMAKE_CURRENT_SOURCE_DIR}/../TimePluginLib.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../extensions/TimePluginLib.h
 	${CMAKE_CURRENT_SOURCE_DIR}/includes/*.h
 	${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h
 )

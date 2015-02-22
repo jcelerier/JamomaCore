@@ -1,2 +1,2 @@
-# TODO Check if iti s necessary to link with libxml
+# TODO Check if it is necessary to link with libxml
 addExtensions()
