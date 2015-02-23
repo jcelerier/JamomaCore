@@ -3,7 +3,7 @@
  * @ingroup foundationLibrary
  *
  * @brief 2-dimensional matrix of compound values with N elements each.
- * 
+ *
  * @author Timothy Place & Nathan Wolek
  *
  * @copyright Copyright © 2011-2012, Timothy Place & Nathan Wolek @n
@@ -49,10 +49,10 @@ TT_OBJECT_CONSTRUCTOR,
 	// TODO: getLockedPointer -- returns a pointer to the data, locks the matrix mutex
 	// TODO: releaseLockedPointer -- releases the matrix mutex
 	// TODO: the above two items mean we need a TTMutex member
-	
+
 	resize();
-	
-	
+
+
 }
 
 
@@ -68,7 +68,7 @@ TTErr TTMatrixBase::resize()
 	mComponentCount = mRowCount * mColumnCount;
 	mDataCount = mComponentCount * mElementCount;
 	mComponentStride = mTypeSizeInBytes * mElementCount;
-    
+
 	if (mDataIsLocallyOwned && mDataSize != mDataCount * mTypeSizeInBytes) {
 		mDataSize = mDataCount * mTypeSizeInBytes;
 
@@ -141,7 +141,7 @@ TTBoolean TTMatrixBase::setTypeWithoutResize(TTDataType aNewType)
 TTErr TTMatrixBase::setRowCount(const TTValue& aNewRowCount)
 {
 	TTRowID aNewRowCountInt = aNewRowCount;
-	
+
 	if (setRowCountWithoutResize(aNewRowCountInt))
 	{
 		return resize();
@@ -154,7 +154,7 @@ TTErr TTMatrixBase::setRowCount(const TTValue& aNewRowCount)
 TTErr TTMatrixBase::setColumnCount(const TTValue& aNewColumnCount)
 {
 	TTColumnID aNewColumnCountInt = aNewColumnCount;
-	
+
 	if (setColumnCountWithoutResize(aNewColumnCountInt))
 	{
 		return resize();
@@ -167,7 +167,7 @@ TTErr TTMatrixBase::setColumnCount(const TTValue& aNewColumnCount)
 TTErr TTMatrixBase::setElementCount(const TTValue& newElementCount)
 {
 	TTElementID aNewElementCountInt = newElementCount;
-	
+
 	if (setElementCountWithoutResize(aNewElementCountInt))
 	{
 		return resize();
@@ -181,7 +181,7 @@ TTErr TTMatrixBase::setType(const TTValue& aType)
 {
 	TTSymbol aNewTypeAsSymbol = aType;
 	TTDataType aNewDataType = TTDataInfo::matchSymbolToDataType(aNewTypeAsSymbol);
-	
+
 	if (setTypeWithoutResize(aNewDataType))
 	{
 		mTypeAsSymbol = aNewTypeAsSymbol; // TODO: dereferencing TTDataInfo->name not working, so this is temp solution
@@ -196,16 +196,16 @@ TTErr TTMatrixBase::setType(const TTValue& aType)
 TTErr TTMatrixBase::setDimensions(const TTValue& someNewDimensions)
 {
 	TTRowID aNewRowCount = 1;
-	TTColumnID aNewColumnCount = 1; 
-	
+	TTColumnID aNewColumnCount = 1;
+
 	TTUInt8	size = someNewDimensions.size();
-	
+
 	// needed to support old calls with 1 or 2 dimensions
 	if (size > 0)
 		aNewRowCount = someNewDimensions[0];
 	if (size > 1)
 		aNewColumnCount = someNewDimensions[1];
-	
+
 	if (this->setRowCountWithoutResize(aNewRowCount) &&
 		this->setColumnCountWithoutResize(aNewColumnCount))
 	{
@@ -219,7 +219,7 @@ TTErr TTMatrixBase::setDimensions(const TTValue& someNewDimensions)
 TTErr TTMatrixBase::getType(TTValue& returnedType) const
 {
 	returnedType = mTypeAsSymbol;
-	
+
 	return kTTErrNone;
 }
 
@@ -229,7 +229,7 @@ TTErr TTMatrixBase::getDimensions(TTValue& returnedDimensions) const
 	returnedDimensions.resize(2);
 	returnedDimensions[0] = TTUInt32(mRowCount); // compile fails if we don't cast mRowCount here
 	returnedDimensions[1] = TTUInt32(mColumnCount); // compile fails if we don't cast mColumnCount here
-	
+
 	return kTTErrNone;
 }
 
@@ -245,11 +245,11 @@ TTErr TTMatrixBase::fill(const TTValue& anInputValue, TTValue &anUnusedOutputVal
 {
 	TTBytePtr fillValue = new TTByte[mComponentStride];
 	TTUInt32 inputElementCount = anInputValue.size();
-	TTUInt32 fillIterationCount = (inputElementCount < mElementCount) ? inputElementCount : mElementCount; // which ever is smaller 
-	
+	TTUInt32 fillIterationCount = (inputElementCount < (TTUInt32) mElementCount) ? inputElementCount : (TTUInt32) mElementCount; // which ever is smaller
+
 	// first we need to copy the TTValues in our array of TTBytes
 	TTBytePtr tempCopyValuePtr;
-    union TTNumericalDataValue {
+	union TTNumericalDataValue {
 		TTFloat32		float32;
 		TTFloat64		float64;
 		TTInt8			int8;
@@ -261,11 +261,11 @@ TTErr TTMatrixBase::fill(const TTValue& anInputValue, TTValue &anUnusedOutputVal
 		TTInt64			int64;
 		TTUInt64		uint64;
 	} tempCopyValue;
-    
-    
+
+
 	for (TTUInt32 f=0; f<fillIterationCount; f++) // step through the elements
 	{
-		
+
 		// NW: an even uglier switch than before, but I see no way around it...
 		switch (mType) {
 			case kTypeFloat32:
@@ -312,11 +312,11 @@ TTErr TTMatrixBase::fill(const TTValue& anInputValue, TTValue &anUnusedOutputVal
 				return kTTErrInvalidType; // type is not numerical or undefined
 				break;
 		}
-		
+
 		memcpy(	fillValue+(f*mTypeSizeInBytes), // pointer to where to start copying
 				tempCopyValuePtr, // the TTBytePtr from the switch above
 				mTypeSizeInBytes); // number of bytes to copy
-				
+
 	}
 
 	for (TTUInt32 i=0; i<mDataSize; i += mComponentStride)
@@ -341,38 +341,38 @@ TTErr TTMatrixBase::fill(const TTValue& anInputValue, TTValue &anUnusedOutputVal
 TTErr TTMatrixBase::get(const TTValue& anInputValue, TTValue &anOutputValue) const
 {
 	TTUInt16 dimensionCount = anInputValue.size();
-	
+
 	if (dimensionCount != 2) // 2 dimensions only
 		return kTTErrWrongNumValues;
 
 	TTInt32 i, j;
 	i = anInputValue[0];
 	j = anInputValue[1];
-	
+
 	TTBoolean weAreNotInBounds = makeInBounds(i,j);
 	if (weAreNotInBounds)
 		return kTTErrOutOfBounds;
 		// TODO: for now we throw an error when out of bounds. wrapping could be option in future version.
-	
+
 	TTUInt32 index = INDEX_OF_COMPONENT_FIRSTBYTE(i, j);
-	
+
 	anOutputValue.clear();
 
 	// TODO: here we have this ugly switch again...
 	// Maybe we could just have duplicate pointers of different types in our class, and then we could access them more cleanly?
-	if (mType == kTypeUInt8) { 
+	if (mType == kTypeUInt8) {
 		for (int e=0; e<mElementCount; e++)
 			anOutputValue.append((TTUInt8*)(mData+(index+e*mTypeSizeInBytes)));
 	}
-	else if (mType == kTypeInt32) { 
+	else if (mType == kTypeInt32) {
 		for (int e=0; e<mElementCount; e++)
 			anOutputValue.append((TTInt32*)(mData+(index+e*mTypeSizeInBytes)));
 	}
-	else if (mType == kTypeFloat32) { 
+	else if (mType == kTypeFloat32) {
 		for (int e=0; e<mElementCount; e++)
 			anOutputValue.append((TTFloat32*)(mData+(index+e*mTypeSizeInBytes)));
 	}
-	else if (mType == kTypeFloat64) { 
+	else if (mType == kTypeFloat64) {
 		for (int e=0; e<mElementCount; e++)
 			anOutputValue.append((TTFloat64*)(mData+(index+e*mTypeSizeInBytes)));
 	}
@@ -396,27 +396,27 @@ TTErr TTMatrixBase::set(const TTValue& anInputValue, TTValue &anUnusedOutputValu
 	TTInt32 i, j;
 	i = anInputValue[0];
 	j = anInputValue[1];
-	
+
 	TTBoolean weAreNotInBounds = makeInBounds(i,j);
 	if (weAreNotInBounds)
 		return kTTErrOutOfBounds;
 		// TODO: for now we throw an error when out of bounds. wrapping could be option in future version.
-	
+
 	TTUInt32 index = INDEX_OF_COMPONENT_FIRSTBYTE(i, j);
-	
-	if (mType == kTypeUInt8) { 
+
+	if (mType == kTypeUInt8) {
 		for (int e=0; e<mElementCount; e++)
 			*(TTUInt8*)(mData+(index+e*mTypeSizeInBytes)) = anInputValue[e+dimensionCount];
 	}
-	else if (mType == kTypeInt32) { 
+	else if (mType == kTypeInt32) {
 		for (int e=0; e<mElementCount; e++)
 			*(TTInt32*)(mData+(index+e*mTypeSizeInBytes)) = anInputValue[e+dimensionCount];
 	}
-	else if (mType == kTypeFloat32) { 
+	else if (mType == kTypeFloat32) {
 		for (int e=0; e<mElementCount; e++)
 			*(TTFloat32*)(mData+(index+e*mTypeSizeInBytes)) = anInputValue[e+dimensionCount];
 	}
-	else if (mType == kTypeFloat64) { 
+	else if (mType == kTypeFloat64) {
 		for (int e=0; e<mElementCount; e++)
 			*(TTFloat64*)(mData+(index+e*mTypeSizeInBytes)) = anInputValue[e+dimensionCount];
 	}
@@ -428,8 +428,8 @@ TTErr TTMatrixBase::set(const TTValue& anInputValue, TTValue &anUnusedOutputValu
 TTBoolean TTMatrixBase::allAttributesMatch(const TTMatrixBase& anotherMatrix) const
 {
 	// TODO: should/could this be inlined?
-	if (mType == anotherMatrix.mType  && 
-		mElementCount == anotherMatrix.mElementCount && 
+	if (mType == anotherMatrix.mType  &&
+		mElementCount == anotherMatrix.mElementCount &&
 		mRowCount == anotherMatrix.mRowCount &&
 		mColumnCount == anotherMatrix.mColumnCount)
 		{
@@ -454,10 +454,10 @@ TTErr TTMatrixBase::adaptTo(const TTMatrixBase& anotherMatrix)
 	// TODO: what should we do if anotherMatrix is not locally owned?
 	// It would be nice to re-dimension the data, but we can't re-alloc / resize the number of bytes...
 	// NW: don't understand above comment, previous set attribute methods *were* calling resize()
-	
+
 	// NOTE: there is potential for some attributes to change while others fail
 	// if that happens, mData is never resized but attributes that changed will report bogus results
-	
+
 	if (setRowCountWithoutResize(anotherMatrix.mRowCount) &&
 		setColumnCountWithoutResize(anotherMatrix.mColumnCount) &&
 		setElementCountWithoutResize(anotherMatrix.mElementCount) &&

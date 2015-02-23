@@ -1,7 +1,7 @@
-/* 
+/*
  * TTBlue (Linked) List Class
  * Copyright © 2008, Timothy Place
- * 
+ *
  * License: This code is licensed under the terms of the "New BSD License"
  * http://creativecommons.org/licenses/BSD/
  */
@@ -30,7 +30,7 @@ TTList::TTList(TTList& that) :
 	mThreadProtection(YES)
 {
 	mMutex = new TTMutex(false);
-	
+
 	theList = that.theList;
 }
 
@@ -40,7 +40,7 @@ TTUInt32 TTList::getSize() const
 {
 	return theList.size();
 }
-	
+
 
 TTValue& TTList::getHead()
 {
@@ -56,13 +56,13 @@ TTValue& TTList::getTail()
 
 void TTList::begin()
 {
-	theIter = theList.begin();	
+	theIter = theList.begin();
 }
 
 
 bool TTList::end()
 {
-	return theIter != theList.end();	
+	return theIter != theList.end();
 }
 
 
@@ -94,7 +94,7 @@ TTErr TTList::getIndex(TTUInt32 index, TTValue& returnedValue)
 {
 	TTErr		err = kTTErrValueNotFound;
 	TTUInt32	i=0;
-	
+
 	lock();
 	for (TTListIter iter = theList.begin(); iter != theList.end(); ++iter) {
 		if (i==index) {
@@ -105,7 +105,7 @@ TTErr TTList::getIndex(TTUInt32 index, TTValue& returnedValue)
 		i++;
 	}
 	unlock();
-	
+
 	return err;
 }
 
@@ -123,7 +123,7 @@ void TTList::appendUnique(const TTValue& newValue)
 {
 	TTErr	err;
 	TTValue	foundValue;
-	
+
 	err = findEquals(newValue, foundValue);
 	if (err == kTTErrValueNotFound)
 		append(newValue);
@@ -133,7 +133,7 @@ void TTList::insert(TTUInt32 index, const TTValue& newValue)
 {
 	TTListIter	iter;
 	TTUInt32	i=0;
-	
+
 	lock();
 	for (iter = theList.begin(); iter != theList.end(); ++iter) {
 		if (i==index) {
@@ -141,7 +141,7 @@ void TTList::insert(TTUInt32 index, const TTValue& newValue)
 		}
 		i++;
 	}
-	
+
 	theList.insert(iter, newValue);
 	unlock();
 }
@@ -156,14 +156,14 @@ void TTList::merge(TTList& newList)
 }
 
 
-void TTList::sort(TTBoolean(comparisonFunction)(TTValue&, TTValue&))
+void TTList::sort(TTBoolean(*comparisonFunction)(TTValue&, TTValue&))
 {
 	lock();
-	
+
 	// If a comparison fonction is given : use it
 	if (comparisonFunction)
 		theList.sort(comparisonFunction);
-	
+
 	// else use the < operator of TTValue to sort the list
 	else
 		theList.sort();
@@ -175,11 +175,11 @@ TTErr TTList::find(TTFunctionMatch aMatchFunction, TTPtr aBaton, TTValue& return
 {
 	TTErr		err = kTTErrGeneric;
 	TTBoolean	found = NO;
-	
+
 	lock();
 	for (TTListIter iter = theList.begin(); iter != theList.end(); ++iter) {
 		TTValue& v = *iter;
-		
+
 		aMatchFunction(v, aBaton, found);
 		if (found) {
 			returnedValue = v;
@@ -195,7 +195,7 @@ TTErr TTList::find(TTFunctionMatch aMatchFunction, TTPtr aBaton, TTValue& return
 TTErr TTList::findEquals(const TTValue& valueToCompareAgainst, TTValue& foundValue)
 {
 	TTErr err = kTTErrValueNotFound;
-	
+
 	lock();
 	for (TTListIter iter = theList.begin(); iter != theList.end(); ++iter) {
 		if ((*iter) == valueToCompareAgainst) {
@@ -205,7 +205,7 @@ TTErr TTList::findEquals(const TTValue& valueToCompareAgainst, TTValue& foundVal
 		}
 	}
 	unlock();
-	
+
 	return err;
 }
 
@@ -215,7 +215,7 @@ void TTList::remove(const TTValue& aValue)
 	lock();
 	for (TTListIter iter = theList.begin(); iter != theList.end(); ++iter) {
 		TTValue v = *iter;
-		
+
 		if (v == aValue) {
 			theList.remove(v);
 			break;
@@ -236,7 +236,7 @@ void TTList::clear()
 void TTList::free()
 {
 //	lock();
-	
+
 // TTValue takes care of memory management of member objects now, so we don't have to worry about it.
 //	for (TTListIter iter = theList.begin(); iter != theList.end(); iter++) {
 //		TTValue& v = *iter;
@@ -258,14 +258,14 @@ void TTList::free()
 void TTList::assignToValue(TTValue& value)
 {
 	TTListIter	iter;
-	
+
 	value.clear();
-	
+
 	lock();
 	for (iter = theList.begin(); iter != theList.end(); ++iter) {
 		value.append(*iter);
 	}
-	unlock();	
+	unlock();
 }
 
 
@@ -279,7 +279,7 @@ TTErr TTList::iterate(const TTObjectBasePtr target, const TTFunctionWithBatonAnd
 		callback(target, *iter);
 	}
 	unlock();
-	return kTTErrNone;	
+	return kTTErrNone;
 }
 
 
@@ -294,7 +294,7 @@ TTErr TTList::iterate(const TTObjectBasePtr target, const TTSymbol messageName)
 		target->sendMessage(messageName, *iter, v);
 	}
 	unlock();
-	return kTTErrNone;	
+	return kTTErrNone;
 }
 
 
@@ -307,14 +307,14 @@ TTErr TTList::iterateObjectsSendingMessage(const TTSymbol messageName)
 	for (TTListIter iter = theList.begin(); iter != theList.end(); ++iter) {
 #ifdef OLD
 		TTObjectBasePtr obj = NULL;
-		
+
 		//(iter)->get(0, &obj);
 		obj = iter->at(0);
 		if (obj && obj->valid)
 			obj->sendMessage(messageName);
 #else // NEW
 		TTObject o = iter->at(0);
-		
+
 		if (o.valid())
 			o.send(messageName);
 #endif
@@ -328,12 +328,12 @@ TTErr TTList::iterateObjectsSendingMessage(const TTSymbol messageName, TTValue& 
 {
 	if (theList.empty())
 		return kTTErrNone;
-	
+
 	lock();
 	for (TTListIter iter = theList.begin(); iter != theList.end(); ++iter) {
 #ifdef OLD
 		TTObjectBasePtr obj = NULL;
-		
+
 		//(iter)->get(0, &obj);
 		obj = iter->at(0);
 		if (obj && obj->valid) {
@@ -343,7 +343,7 @@ TTErr TTList::iterateObjectsSendingMessage(const TTSymbol messageName, TTValue& 
 #else // NEW
 		TTObject	o = iter->at(0);
 		TTValue		unusedReturnValue;
-	
+
 		if (o.valid())
 			o.send(messageName, aValue);
 #endif

@@ -12,6 +12,12 @@ if(NOT PORTMIDI_FOUND)
   return()
 endif()
 
+if(WIN32)
+	message("We can't build ${PROJECT_NAME} on Windows Release yet")
+	message("TODO : Rebuild PortMidi with /MD")
+	return()
+endif()
+
 set(PROJECT_SRCS
 ${CMAKE_CURRENT_SOURCE_DIR}/MidiLib.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/TTMidiFilter.cpp
@@ -34,7 +40,7 @@ target_link_libraries(${PROJECT_NAME}
 if(WIN32)
 	target_link_libraries(${PROJECT_NAME} winmm)
 endif()
-					  
+
 target_link_frameworks(TARGET ${PROJECT_NAME}
 					   FRAMEWORKS Carbon CoreAudio CoreMIDI CoreFoundation)
 

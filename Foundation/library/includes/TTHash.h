@@ -1,4 +1,4 @@
-/* 
+/*
  * Jamoma Hash Table Class
  * Copyright © 2008, Timothy Place
  *
@@ -45,7 +45,7 @@ private:
 public:
 	TTHash();
 	virtual ~TTHash();
-	
+
 	TTHash(TTHash& that);
 
 	/** Insert an item into the hash table. */
@@ -56,7 +56,7 @@ public:
 
 	/** Find the value for the given key. */
 	TTErr lookup(const TTSymbol key, TTValue& value);
-	
+
 	// This is used by the Ruby extension
 	TTErr lookup(const TTPtr key, TTValue& value);
 
@@ -71,9 +71,9 @@ public:
 
 	/** Get an array of all of the keys for the hash table. */
 	TTErr getKeys(TTValue& hashKeys);
-	
+
 	/** Get an array of all of the keys sorted for the hash table. */
-	TTErr getKeysSorted(TTValue& hashKeysSorted, TTBoolean(comparisonFunction)(TTValue&, TTValue&) = NULL);
+	TTErr getKeysSorted(TTValue& hashKeysSorted, TTBoolean(*comparisonFunction)(TTValue&, TTValue&) = NULL);
 
 	/** Return the number of keys in the hash table. */
 	TTUInt32 getSize();

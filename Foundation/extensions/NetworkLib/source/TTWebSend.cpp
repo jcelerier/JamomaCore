@@ -20,7 +20,7 @@ TT_OBJECT_CONSTRUCTOR,
 mSocket(NULL)
 {
 	addMessageWithArguments(send);
-    connect();
+	connect();
 }
 
 TTWebSend::~TTWebSend()
@@ -30,24 +30,24 @@ TTWebSend::~TTWebSend()
 
 void TTWebSend::connect()
 {
-    delete mSocket;
-    mSocket = new TTWebSocket();
+	delete mSocket;
+	mSocket = new TTWebSocket();
 }
 
 TTErr TTWebSend::send(const TTValue& value, TTValue& unusedOutput)
 {
 	TTSymbol    message;
-	TTValuePtr	arguments;
-    
+//	TTValuePtr	arguments;
+
 	if (mSocket) {
 		// set all application parameters using a TTHash
-        if (value.size()) {
-            if (value[0].type() == kTypeSymbol) {
-                message = value[0];
-                return mSocket->SendMessage(message);
-            }
-        }
+		if (value.size()) {
+			if (value[0].type() == kTypeSymbol) {
+				message = value[0];
+				return mSocket->SendMessage(message);
+			}
+		}
 	}
-	
+
 	return kTTErrGeneric;
 }

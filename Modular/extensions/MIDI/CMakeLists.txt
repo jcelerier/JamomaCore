@@ -17,6 +17,12 @@ if(NOT PORTMIDI_FOUND)
   return()
 endif()
 
+if(WIN32)
+	message("We can't build ${PROJECT_NAME} on Windows Release yet")
+	message("TODO : Rebuild PortMidi with /MD")
+	return()
+endif()
+
 set(PROJECT_SRCS
 $<TARGET_OBJECTS:ProtocolLib>
 ${CMAKE_CURRENT_SOURCE_DIR}/source/MIDI.cpp

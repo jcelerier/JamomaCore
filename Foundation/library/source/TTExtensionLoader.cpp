@@ -337,12 +337,7 @@ class WindowsSpecificInformation
 		{
 			TTString	fullpath{};
 			char		temppath[4096];
-			HKEY		hKey = 0;
 			LONG		lRes;
-			DWORD		dwSize = sizeof(temppath);
-			HRESULT		hr;
-			HINSTANCE	hInstance = GetModuleHandle(NULL);
-
 
 			LPCSTR moduleName = "JamomaFoundation.dll";
 			HMODULE	hmodule = GetModuleHandle(moduleName);
@@ -359,7 +354,7 @@ class WindowsSpecificInformation
 				}
 			}
 
-			return fullpath;
+			return fullpath.c_str();
 		}
 
 		static StringVector builtinRelativePaths()
@@ -383,16 +378,16 @@ class WindowsSpecificInformation
 			auto windowsPathSpec = fullpath + "/*.ttdll";
 			WIN32_FIND_DATA FindFileData;
 			HANDLE hFind = FindFirstFile(windowsPathSpec.c_str(), &FindFileData);
-			
+
 			int count = 0; // Number of extensions loaded.
 			if (hFind == INVALID_HANDLE_VALUE)
 				return false;
 			do {
 				string fileName{FindFileData.cFileName};
-				
+
 				if(!isExtensionFilename<WindowsSpecificInformation>(fileName))
 					continue;
-				
+
 				// TODO Refactor by abstracting only this part.
 				void *handle = LoadLibrary(FindFileData.cFileName);
 				if (!handle)
@@ -403,7 +398,7 @@ class WindowsSpecificInformation
 
 				// Load the Jamoma extension
 				string initFun = "TTLoadJamomaExtension_" + filenameToExtensionName<WindowsSpecificInformation>(fileName);
-				
+
 				// TODO Refactor by abstracting only this part.
 				auto initializer = reinterpret_cast<TTExtensionInitializationMethod>(
 					GetProcAddress((HMODULE)handle, initFun.c_str()));
@@ -419,10 +414,10 @@ class WindowsSpecificInformation
 						++count;
 					}
 				}
-				
+
 			} while (FindNextFile(hFind, &FindFileData));
 			FindClose(hFind);
-			
+
 			return count != 0;
 		}
 };

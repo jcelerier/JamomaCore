@@ -29,10 +29,10 @@ TT_OBJECT_CONSTRUCTOR,
 
 	addMessageWithArguments(dictionary);
 	addMessageWithArguments(convert);
-	
+
 	addMessageWithArguments(getAvailableUnits);
 	addMessageWithArguments(getAvailableDataspaces);
-	
+
 	setAttributeValue(TT("dataspace"), TT("none"));
 }
 
@@ -48,23 +48,23 @@ TTErr TTDataspaceConverter::setDataspace(const TTValue& newValue)
 	TTSymbol		name;
 	TTErr			err;
 	TTString		objectName = "dataspace.";
-	
+
 	name = newValue[0];
-	
+
 	// TODO: validate the name provided before proceeding
 	objectName += name.c_str();
 	err = TTObjectBaseInstantiate(TT(objectName.c_str()), &mDataspaceTTObject, 0);
 	if (err) {
-        // Rather than crashing:
-            //throw TTException("Error trying to load dataspace with that name");
-        // we set it to "none" and post an error message to the log
-        TTLogError("Error trying to load %s, set to none\n", objectName.c_str());
-        objectName = "dataspace.none";
-        TTObjectBaseInstantiate(TT(objectName.c_str()), &mDataspaceTTObject, 0);
-    }
+		// Rather than crashing:
+			//throw TTException("Error trying to load dataspace with that name");
+		// we set it to "none" and post an error message to the log
+		TTLogError("Error trying to load %s, set to none\n", objectName.c_str());
+		objectName = "dataspace.none";
+		TTObjectBaseInstantiate(TT(objectName.c_str()), &mDataspaceTTObject, 0);
+	}
 	mDataspaceObject = dynamic_cast<TTDataspacePtr>(mDataspaceTTObject);
 	mDataspace = name;
-	
+
 	return err;
 }
 
@@ -81,7 +81,7 @@ TTErr TTDataspaceConverter::dictionary(const TTValue& anInputValue, TTValue& anO
 	TTValue			in;
 	TTValue			out;
 	TTErr			err;
-	
+
 	d = (TTDictionaryPtr)&(anInputValue[0]);
 	d->getValue(in);
 	err = convert(in, out);
@@ -128,17 +128,17 @@ TTErr TTDataspaceConverter::getAvailableUnits(const TTValue& anUnusedInputValue,
 TTErr TTDataspaceConverter::getAvailableDataspaces(const TTValue& anUnusedInputValue, TTValue& dataspaceNames)
 {
 	TTErr err;
-	
+
 	err = TTObject::GetRegisteredClassNamesForTags(dataspaceNames, TT("dataspace"));
 	if (!err) {
 		// strip the leading "dataspace." prefix off all the names
-		for (int i=0; i < dataspaceNames.size(); i++) {
+		for (TTUInt32 i=0; i < dataspaceNames.size(); i++) {
 			TTSymbol s;
 			//TTString	str;
 			const char* cStr;
-			
+
 			s = dataspaceNames[i];
-			/* 
+			/*
 			str = s->getString();	// this causes crashes on Windows, need to use C string instead
 			str.erase(0, 10);
 			*/

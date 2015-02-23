@@ -51,26 +51,26 @@ TTErr TTMapperManager::New()
 
 TTErr TTMapperManager::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTObject o = inputValue[0];
+	TTObject o = inputValue[0];
 	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
-    if (!aXmlHandler)
+	if (!aXmlHandler)
 		return kTTErrGeneric;
-    
+
 	TTObject	aMapper;
 	TTValue		v, attributes;
 	TTSymbol	attributeName;
-    TTString    s;
-	
+	TTString    s;
+
 	// Browse the mapper list
 	for (mMapperList.begin(); mMapperList.end(); mMapperList.next()) {
-		
+
 		xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "mapper");
 
 		aMapper = mMapperList.current()[0];
 
 		// Get mapper attributes
 		aMapper.attributes(attributes);
-		for (int i = 0; i < attributes.size(); i++) {
+		for (TTInt32 i = 0; i < (TTInt32) attributes.size(); i++) {
 
 			attributeName = attributes[i];
 
@@ -78,15 +78,15 @@ TTErr TTMapperManager::WriteAsXml(const TTValue& inputValue, TTValue& outputValu
 			if (attributeName != TTSymbol("functionLibrary") && attributeName != TTSymbol("functionSamples") && attributeName != TTSymbol("functionParameters")) {
 
 				aMapper.get(attributeName, v);
-                v.toString();
-                s = TTString(v[0]);
+				v.toString();
+				s = TTString(v[0]);
 				xmlTextWriterWriteFormatAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST attributeName.c_str(), "%s", BAD_CAST s.c_str());
 			}
 		}
-		
+
 		aXmlHandler->setAttributeValue(kTTSym_object, aMapper);
 		aXmlHandler->sendMessage(TTSymbol("Write"));
-		
+
 		// End a mapper
 		xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
 	}
@@ -96,11 +96,11 @@ TTErr TTMapperManager::WriteAsXml(const TTValue& inputValue, TTValue& outputValu
 
 TTErr TTMapperManager::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTObject o = inputValue[0];
+	TTObject o = inputValue[0];
 	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
-    if (!aXmlHandler)
+	if (!aXmlHandler)
 		return kTTErrGeneric;
-    
+
 	TTSymbol	attributeName, mute;
 	TTObject	newMapper;
 	TTValue		v;
@@ -129,12 +129,12 @@ TTErr TTMapperManager::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
 		// get mute state
 		if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, BAD_CAST "mute") == 1) {
 			aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
-            
-            if (v.size() == 1)
-                if (v[0].type() == kTypeSymbol)
-                    mute = v[0];
+
+			if (v.size() == 1)
+				if (v[0].type() == kTypeSymbol)
+					mute = v[0];
 		}
-		
+
 		if (mute == TTSymbol("false")) {
 
 			// Create a new mapper
@@ -145,19 +145,19 @@ TTErr TTMapperManager::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
 
 				// Get attribute name
 				aXmlHandler->fromXmlChar(xmlTextReaderName((xmlTextReaderPtr)aXmlHandler->mReader), v);
-                
-                if (v.size() == 1) {
-                    if (v[0].type() == kTypeSymbol) {
-                        attributeName = v[0];
-                        v.clear();
-                        
-                        // Get attribute value
-                        aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
-                        
-                        // fill the current mapper
-                        newMapper.set(attributeName, v);
-                    }
-                }
+
+				if (v.size() == 1) {
+					if (v[0].type() == kTypeSymbol) {
+						attributeName = v[0];
+						v.clear();
+
+						// Get attribute value
+						aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
+
+						// fill the current mapper
+						newMapper.set(attributeName, v);
+					}
+				}
 			}
 
 			// Add Mapper in the list
@@ -169,7 +169,7 @@ TTErr TTMapperManager::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
 }
 
 TTErr TTMapperManager::setAddress(const TTValue& value)
-{	
+{
 	New();
 	mAddress = value[0];
 	return kTTErrNone;
