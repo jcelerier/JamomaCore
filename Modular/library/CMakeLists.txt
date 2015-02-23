@@ -4,8 +4,9 @@ project(Modular)
 add_definitions(-DTTMODULAR_EXPORTS)
 
 find_package(LibXml2 REQUIRED)
-if(NOT LIBXML2_FOUND)
-  message(FATAL_ERROR "Package libxml2 required, but not found!")
+if(WIN32)
+	find_package(Libiconv REQUIRED)
+	include_directories(${LIBICONV_INCLUDE_DIR})
 endif()
 
 #### ProtocolLib ####
@@ -76,6 +77,10 @@ file(GLOB_RECURSE PROJECT_HDRS
 
 include_directories("${PROJECT_SOURCE_DIR}/includes")
 include_directories(${LIBXML2_INCLUDE_DIR})
+
+if(WIN32)
+	include_directories(${LIBICONV_INCLUDE_DIR})
+endif()
 include_directories(
 $<TARGET_PROPERTY:ProtocolLib,INTERFACE_INCLUDE_DIRECTORIES>
 $<TARGET_PROPERTY:SchedulerLib,INTERFACE_INCLUDE_DIRECTORIES>
@@ -86,6 +91,9 @@ add_jamoma_library()
 target_link_libraries(${PROJECT_NAME} Foundation)
 target_link_libraries(${PROJECT_NAME} DSP)
 target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})
+if(WIN32)
+	target_link_libraries(${PROJECT_NAME} ws2_32)
+endif()
 
 ### Tests ###
 addTestTarget()

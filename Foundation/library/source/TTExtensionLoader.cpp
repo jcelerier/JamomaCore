@@ -7,12 +7,14 @@
 using StringVector = std::vector<std::string>;
 
 // Utility compile-time functions to work with string constants.
+// Except on windows, where constexpr will only be in VS2015 (hopefully...)
+#if !defined(TT_PLATFORM_WIN)
 template <typename T, std::size_t n>
-constexpr size_t array_length(const T (&)[n])
+constexpr std::size_t array_length(const T (&)[n])
 { return n; }
 
 template <typename T>
-constexpr size_t string_length(T&& t)
+constexpr std::size_t string_length(T&& t)
 { return array_length(std::forward<T&&>(t)) - 1; }
 
 template<typename T>
@@ -20,7 +22,18 @@ constexpr bool string_empty(T&& t)
 {
 	return string_length(std::forward<T&&>(t)) == 0;
 }
+#else
+unsigned int array_length(const char* str)
+{ return strlen(str) + 1; }
+unsigned int string_length(const char* str)
+{ return strlen(str); }
+bool string_empty(const char* str)
+{
+	return strlen(str) == 0;
+}
 
+
+#endif
 
 template<typename OS>
 // Returns true if the filename (ex. : AudioEngine.ttdylib)
@@ -45,6 +58,21 @@ bool isExtensionFilename(const std::string& filename)
 	return false;
 }
 
+class WindowsSpecificInformation;
+template<>
+bool isExtensionFilename<WindowsSpecificInformation>(const std::string& filename)
+{
+	std::string suffix{".ttdll"};
+	if(filename.length() >= suffix.length())
+	{
+		return (0 == filename.compare(
+						filename.length() - suffix.length(),
+						suffix.length(),
+						suffix));
+	}
+	return false;
+}
+
 template<typename OS>
 // Gets the extension name from the file name.
 // ex. : libWebSocket.so on Android -> WebSocket
@@ -65,6 +93,12 @@ std::string filenameToExtensionName(std::string name)
 	return name;
 }
 
+template<>
+std::string filenameToExtensionName<WindowsSpecificInformation>(std::string name)
+{
+	name.erase(end(name) - 6, end(name));
+	return name;
+}
 
 /**
   Here is the platform-specific code.
@@ -296,8 +330,8 @@ using OperatingSystem = LinuxSpecificInformation;
 class WindowsSpecificInformation
 {
 	public:
-		static constexpr const char extensionPrefix[]{""};
-		static constexpr const char extensionSuffix[]{".ttdll"};
+		static const char* extensionPrefix;
+		static const char* extensionSuffix;
 
 		static std::string computedRelativePath()
 		{
@@ -343,52 +377,66 @@ class WindowsSpecificInformation
 			};
 		}
 
-		static bool loadClassesFromFolder(const std::string& folderName)
+		static bool loadClassesFromFolder(const std::string& fullpath)
 		{
-			TTString windowsPathSpec = fullpath;
-			windowsPathSpec += "/*.ttdll";
+			using namespace std;
+			auto windowsPathSpec = fullpath + "/*.ttdll";
 			WIN32_FIND_DATA FindFileData;
 			HANDLE hFind = FindFirstFile(windowsPathSpec.c_str(), &FindFileData);
+			
+			int count = 0; // Number of extensions loaded.
 			if (hFind == INVALID_HANDLE_VALUE)
-				return kTTErrGeneric;
+				return false;
 			do {
-				printf("%s\n", FindFileData.cFileName);
-				TTString fileName(FindFileData.cFileName);
-				TTString fileSuffix(strrchr(fileName.c_str(), '.'));
-				TTString fileBaseName = fileName.substr(0, fileName.size() - 6);
-				TTString fileFullpath(fullpath);
-
-				void* handle = NULL;
-				fileFullpath += "/";
-				fileFullpath += fileName;
-
-				handle = LoadLibrary(FindFileData.cFileName);
-
-				if (!handle)
+				string fileName{FindFileData.cFileName};
+				
+				if(!isExtensionFilename<WindowsSpecificInformation>(fileName))
 					continue;
+				
+				// TODO Refactor by abstracting only this part.
+				void *handle = LoadLibrary(FindFileData.cFileName);
+				if (!handle)
+				{
+					TTLogMessage("LoadLibrary: ERROR");
+					continue;
+				}
 
-				// TODO: assert -- or at least do a log post -- if handle is NULL
-				initializerFunctionName = "TTLoadJamomaExtension_";
-				initializerFunctionName += fileBaseName;
-
-				std::cout << "initializerFunctionName: " << initializerFunctionName << std::endl;
-				initializer = (TTExtensionInitializationMethod)GetProcAddress((HMODULE)handle, initializerFunctionName.c_str());
-
+				// Load the Jamoma extension
+				string initFun = "TTLoadJamomaExtension_" + filenameToExtensionName<WindowsSpecificInformation>(fileName);
+				
+				// TODO Refactor by abstracting only this part.
+				auto initializer = reinterpret_cast<TTExtensionInitializationMethod>(
+					GetProcAddress((HMODULE)handle, initFun.c_str()));
 				if (initializer)
-					err = initializer();
-
+				{
+					auto err = initializer();
+					if(err != kTTErrNone)
+					{
+						TTLogMessage("Error when initializing extension %s\n", fileName.c_str());
+					}
+					else
+					{
+						++count;
+					}
+				}
+				
 			} while (FindNextFile(hFind, &FindFileData));
 			FindClose(hFind);
-
+			
+			return count != 0;
 		}
 };
 using OperatingSystem = WindowsSpecificInformation;
 #endif
 
 // Because these members are static they have to be allocated in this compilation unit.
+#if defined(TT_PLATFORM_WIN)
+const char* OperatingSystem::extensionPrefix = "";
+const char* OperatingSystem::extensionSuffix = ".ttdll";
+#else
 constexpr const char OperatingSystem::extensionPrefix[array_length(OperatingSystem::extensionPrefix)];
 constexpr const char OperatingSystem::extensionSuffix[array_length(OperatingSystem::extensionSuffix)];
-
+#endif
 
 template<typename OS>
 bool loadClassesFromPaths(StringVector&& v)

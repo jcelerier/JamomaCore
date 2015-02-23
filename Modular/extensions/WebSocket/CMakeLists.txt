@@ -36,6 +36,8 @@ include_directories("${PROJECT_SOURCE_DIR}/libjson")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-DTT_PROTOCOL_DEBUG)
 	add_definitions(-DJAMOMA_WEBSOCKET_JSON_DEBUG)
+else()
+	add_definitions(-DNDEBUG)
 endif()
 
 file(GLOB_RECURSE PROJECT_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/includes/*.h)

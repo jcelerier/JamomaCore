@@ -31,6 +31,10 @@ target_link_libraries(${PROJECT_NAME}
 					  debug ${PORTMIDI_LIBRARIES_DEBUG}
 					  optimized ${PORTMIDI_LIBRARIES_DEBUG})
 
+if(WIN32)
+	target_link_libraries(${PROJECT_NAME} winmm)
+endif()
+					  
 target_link_frameworks(TARGET ${PROJECT_NAME}
 					   FRAMEWORKS Carbon CoreAudio CoreMIDI CoreFoundation)
 

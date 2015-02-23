@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 project(Scenario)
 
-find_package(LibXml2)
-if(NOT LIBXML2_FOUND)
-  message(STATUS "Package libxml2 required, but not found! Won't build extension Scenario.")
-  return()
-endif()
-
 set(PROJECT_SRCS
 ${CMAKE_CURRENT_SOURCE_DIR}/source/Scenario.cpp
 $<TARGET_OBJECTS:TimePluginLib>
@@ -24,14 +18,6 @@ include_directories("${PROJECT_SOURCE_DIR}/../../library/tests")
 
 include_directories($<TARGET_PROPERTY:TimePluginLib,INTERFACE_INCLUDE_DIRECTORIES>)
 
-# TODO make FindPthreadWin32.cmake
-if(WIN32)
-	SET(PTHREAD_WIN32_PATH "C:\\Program Files (x86)\\pthread-win32" )
-	FILE(TO_CMAKE_PATH ${PTHREAD_WIN32_PATH} PTHREAD_WIN32_PATH_CMAKE)
-	include_directories("${PTHREAD_WIN32_PATH_CMAKE}/include")
-endif()
-
-include_directories(${LIBXML2_INCLUDE_DIR})
 if(ANDROID)
 include_directories("${CMAKE_FIND_ROOT_PATH}/include")
 endif()
@@ -41,10 +27,3 @@ if(WIN32)
 endif()
 
 add_jamoma_extension()
-
-target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})
-
-# TODO make FindPthreadWin32.cmake
-if(WIN32)
-	target_link_libraries(${PROJECT_NAME} "${PTHREAD_WIN32_PATH_CMAKE}/lib/x86/pthreadVC2.lib")
-endif()

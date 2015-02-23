@@ -234,16 +234,16 @@ function(addMaxsupport)
 		if(CMAKE_BUILD_TYPE STREQUAL "Release")
 			add_definitions(-DMAXAPI_USE_MSCRT)
 		endif()
-		FIND_LIBRARY(MaxCRT_LIB 
-					 NAMES maxcrt
-					 PATHS ${MAXSDK_PATH}/max-includes/)
-		MARK_AS_ADVANCED (MaxCRT_LIB)
-		SET(MaxCRT_LIB ${MaxCRT_LIB})
-		FIND_LIBRARY(MaxCRT_P_LIB 
-					 NAMES maxcrt_p
-					 PATHS ${MAXSDK_PATH}/max-includes/)
-		MARK_AS_ADVANCED (MaxCRT_P_LIB)
-		SET(MaxCRT_P_LIB ${MaxCRT_P_LIB})
+		# FIND_LIBRARY(MaxCRT_LIB 
+					 # NAMES maxcrt
+					 # PATHS ${MAXSDK_PATH}/max-includes/)
+		# MARK_AS_ADVANCED (MaxCRT_LIB)
+		# SET(MaxCRT_LIB ${MaxCRT_LIB})
+		# FIND_LIBRARY(MaxCRT_P_LIB 
+					 # NAMES maxcrt_p
+					 # PATHS ${MAXSDK_PATH}/max-includes/)
+		# MARK_AS_ADVANCED (MaxCRT_P_LIB)
+		# SET(MaxCRT_P_LIB ${MaxCRT_P_LIB})
 	endif()
 	
 	FIND_LIBRARY(MaxAudio_LIB 

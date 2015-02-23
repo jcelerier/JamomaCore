@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 project(Automation)
 
-find_package(LibXml2)
-if(NOT LIBXML2_FOUND)
-  message(STATUS "Package libxml2 required, but not found! Won't build extension Automation.")
-  return()
-endif()
-
 set(PROJECT_SRCS
 $<TARGET_OBJECTS:TimePluginLib>
 ${CMAKE_CURRENT_SOURCE_DIR}/source/Automation.cpp
@@ -20,11 +14,8 @@ include_directories("${PROJECT_SOURCE_DIR}/../../library/tests")
 
 include_directories($<TARGET_PROPERTY:TimePluginLib,INTERFACE_INCLUDE_DIRECTORIES>)
 
-include_directories(${LIBXML2_INCLUDE_DIR})
 if(ANDROID)
 include_directories("${CMAKE_FIND_ROOT_PATH}/include")
 endif()
 
 add_jamoma_extension()
-
-target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})

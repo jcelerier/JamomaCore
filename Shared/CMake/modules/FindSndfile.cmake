@@ -11,9 +11,8 @@ if(APPLE OR WIN32)
 	FIND_PATH(SNDFILE_INCLUDE_DIR sndfile.h
 			  PATHS ${CMAKE_CURRENT_LIST_DIR}/../../../DSP/extensions/SoundfileLib/libsndfile)
 
-	FIND_LIBRARY(SNDFILE_LIBRARY NAMES sndfile-jamoma sndfile-1
+	FIND_LIBRARY(SNDFILE_LIBRARY NAMES sndfile-jamoma sndfile-1 libsndfile-1
 				 PATHS ${CMAKE_CURRENT_LIST_DIR}/../../../DSP/extensions/SoundfileLib/libsndfile)
-
 
 else()
 	FIND_PATH(SNDFILE_INCLUDE_DIR sndfile.h)
