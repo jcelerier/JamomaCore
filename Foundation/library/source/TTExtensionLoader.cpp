@@ -169,7 +169,7 @@ class UnixCommon
 								[] (const char * file) 
 								{ return dlopen(file, RTLD_LAZY); },
 								[] (void* handle, const char * fun) 
-								{ return dlsym(handle, fun); })
+								{ return dlsym(handle, fun); }))
 				{
 					++count;
 				}
@@ -414,16 +414,6 @@ constexpr const char OperatingSystem::extensionPrefix[array_length(OperatingSyst
 constexpr const char OperatingSystem::extensionSuffix[array_length(OperatingSystem::extensionSuffix)];
 #endif
 
-
-template<typename OS>
-// Try to load Jamoma classes from the paths built-in for the 
-// platform.
-bool loadClassesFromBuiltinPaths()
-{
-	return loadClassesFromPaths<OS>(OS::builtinRelativePaths()) || 
-		   loadClassesFromPaths<OS>(OS::builtinAbsolutePaths());
-}
-
 template<typename OS>
 // Try to load Jamoma classes from a vector of paths.
 // This will return on the first successful folder.
@@ -440,6 +430,15 @@ bool loadClassesFromComputedPaths()
 	auto computedPath = OperatingSystem::computedRelativePath();
 	return (!computedPath.empty()
 			&& OperatingSystem::loadClassesFromFolder(computedPath));
+}
+
+template<typename OS>
+// Try to load Jamoma classes from the paths built-in for the 
+// platform.
+bool loadClassesFromBuiltinPaths()
+{
+	return loadClassesFromPaths<OS>(OS::builtinRelativePaths()) || 
+		   loadClassesFromPaths<OS>(OS::builtinAbsolutePaths());
 }
 
 void TTLoadExtensions(const char* pathToBinaries, bool loadFromOtherPaths)
