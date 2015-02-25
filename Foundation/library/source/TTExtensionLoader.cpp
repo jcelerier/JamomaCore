@@ -85,19 +85,21 @@ template<typename OS, typename Loader, typename GetProc>
 // GetProc : a callable object that takes a handle and a function name, 
 //           and returns a pointer to the function.
 bool loadClass(const string& filename, 
-			   const string& fullpath, 
+			   const string& folder,
 			   Loader&& handle_fun, 
 			   GetProc&& getproc_fun)
 {
 	// Check if the file is a Jamoma extension
 	if(!isExtensionFilename<OS>(filename))
 		return false;
+
+	std::cerr << filename << folder << std::endl;
 	
 	// Get a handle
-	void *handle = handle_fun(filename.c_str());
+	void *handle = handle_fun((folder + "/" + filename).c_str());
 	if (!handle)
 	{
-		TTLogMessage("Error when trying to get an handle on %s.", filename.c_str());
+		TTLogMessage("Error when trying to get an handle on %s.\n", filename.c_str());
 		return false;
 	}
 
@@ -109,7 +111,7 @@ bool loadClass(const string& filename,
 		auto err = initializer();
 		if(err != kTTErrNone)
 		{
-			TTLogMessage("Error when initializing extension %s\n", filename.c_str());
+			TTLogMessage("Error when initializing extension %s.\n", filename.c_str());
 			return false;
 		}
 		return true;
@@ -156,6 +158,7 @@ class UnixCommon
 		// Try to load extensions. Returns "true" only if at least one extension was loaded.
 		static bool loadClassesFromFolder(const string& fullpath)
 		{
+			std::cerr << fullpath << std::endl;
 			DIR* dirp = opendir(fullpath.c_str());
 			if(!dirp)
 				return false;
