@@ -93,8 +93,6 @@ bool loadClass(const string& filename,
 	if(!isExtensionFilename<OS>(filename))
 		return false;
 
-	std::cerr << filename << folder << std::endl;
-	
 	// Get a handle
 	void *handle = handle_fun((folder + "/" + filename).c_str());
 	if (!handle)
@@ -156,10 +154,9 @@ class UnixCommon
 
 		template<typename OS>
 		// Try to load extensions. Returns "true" only if at least one extension was loaded.
-		static bool loadClassesFromFolder(const string& fullpath)
+		static bool loadClassesFromFolder(const string& folder)
 		{
-			std::cerr << fullpath << std::endl;
-			DIR* dirp = opendir(fullpath.c_str());
+			DIR* dirp = opendir(folder.c_str());
 			if(!dirp)
 				return false;
 
@@ -168,7 +165,7 @@ class UnixCommon
 			while ((dp = readdir(dirp)))
 			{
 				if(loadClass<OS>(dp->d_name, 
-								 fullpath, 
+								 folder,
 								[] (const char * file) 
 								{ return dlopen(file, RTLD_LAZY); },
 								[] (void* handle, const char * fun) 
@@ -182,7 +179,7 @@ class UnixCommon
 			
 			if(count > 0)
 			{
-				TTFoundationBinaryPath = fullpath.c_str();
+				TTFoundationBinaryPath = folder.c_str();
 				return true;
 			}
 			
@@ -305,7 +302,7 @@ class WinSpecific
 		static string computedRelativePath();
 		static StringVector builtinRelativePaths();
 		static StringVector builtinAbsolutePaths();
-		static bool loadClassesFromFolder(const string& fullpath);
+		static bool loadClassesFromFolder(const string& folder);
 };
 
 // Specializations since windows does not support constexpr yet.
@@ -369,9 +366,9 @@ StringVector WinSpecific::builtinAbsolutePaths()
 	};
 }
 
-bool WinSpecific::loadClassesFromFolder(const string& fullpath)
+bool WinSpecific::loadClassesFromFolder(const string& folder)
 {
-	auto windowsPathSpec = fullpath 
+	auto windowsPathSpec = folder
 							+ "/*" 
 							+ string{WinSpecific::extensionSuffix};
 	WIN32_FIND_DATA FindFileData;
@@ -384,7 +381,7 @@ bool WinSpecific::loadClassesFromFolder(const string& fullpath)
 	do {
 		if(loadClass<WinSpecific>(
 						 FindFileData.cFileName, 
-						 fullpath, 
+						 folder,
 						[] (const char * file) 
 						{ return LoadLibrary(file); },
 						[] (void* handle, const char * fun) 
@@ -398,7 +395,7 @@ bool WinSpecific::loadClassesFromFolder(const string& fullpath)
 	
 	if(count > 0)
 	{
-		TTFoundationBinaryPath = fullpath.c_str();
+		TTFoundationBinaryPath = folder.c_str();
 		return true;
 	}
 			
